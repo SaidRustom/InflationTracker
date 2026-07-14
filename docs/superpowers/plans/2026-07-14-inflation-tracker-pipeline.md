@@ -749,7 +749,9 @@ ROWS = [
 
 
 def _cfg() -> AppConfig:
-    mk = lambda i, k: SeriesConfig(id=i, label_en=i, label_fr=i, frequency="daily", role="yield", metric_key=k)
+    def mk(i, k):
+        return SeriesConfig(id=i, label_en=i, label_fr=i, frequency="daily", role="yield", metric_key=k)
+
     return AppConfig(
         start_date="2000-01-01",
         series=[mk("Y2", "yield_2y"), mk("Y10", "yield_10y"), mk("Y5", "yield_5y"),
@@ -1082,7 +1084,9 @@ ROWS = [
 
 
 def _cfg() -> AppConfig:
-    y = lambda i, k: SeriesConfig(id=i, label_en=i, label_fr=i, frequency="daily", role="yield", metric_key=k)
+    def y(i, k):
+        return SeriesConfig(id=i, label_en=i, label_fr=i, frequency="daily", role="yield", metric_key=k)
+
     return AppConfig(
         start_date="2000-01-01",
         series=[
