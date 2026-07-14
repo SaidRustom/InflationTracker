@@ -1,0 +1,10 @@
+series:
+  - {id: V39079,             kind: series, frequency: daily,   role: policy,    label_en: "Target for the overnight rate", label_fr: "Cible du taux du financement à un jour"}
+  - {id: AVG.INTWO,          kind: series, frequency: daily,   role: funding,   label_en: "CORRA (overnight funding)",     label_fr: "CORRA (financement à un jour)"}
+  - {id: BD.CDN.2YR.DQ.YLD,  kind: series, frequency: daily,   role: yield,     metric_key: yield_2y,  label_en: "GoC benchmark yield: 2 year",  label_fr: "Rendement de référence GdC : 2 ans"}
+  - {id: BD.CDN.5YR.DQ.YLD,  kind: series, frequency: daily,   role: yield,     metric_key: yield_5y,  label_en: "GoC benchmark yield: 5 year",  label_fr: "Rendement de référence GdC : 5 ans"}
+  - {id: BD.CDN.10YR.DQ.YLD, kind: series, frequency: daily,   role: yield,     metric_key: yield_10y, label_en: "GoC benchmark yield: 10 year", label_fr: "Rendement de référence GdC : 10 ans"}
+  - {id: V122667780,         kind: series, frequency: monthly, role: lending,   metric_key: mortgage_5y_fixed, label_en: "Insured 5yr+ fixed mortgage rate", label_fr: "Taux hypothécaire fixe assuré 5 ans et +"}
+  - {id: CPI_TRIM,           kind: series, frequency: monthly, role: inflation, label_en: "Core inflation: CPI-trim",   label_fr: "Inflation fondamentale : IPC-tronq"}
+  - {id: CPI_MEDIAN,         kind: series, frequency: monthly, role: inflation, label_en: "Core inflation: CPI-median", label_fr: "Inflation fondamentale : IPC-méd"}
+  - {id: CPI_COMMON,         kind: series, frequency: monthly, role: inflation, label_en: "Core inflation: CPI-common", label_fr: "Inflation fondamentale : IPC-comm"}

@@ -1,0 +1,10 @@
+start_date: "2000-01-01"
+thresholds:
+  staleness_days: {daily: 7, weekly: 14, monthly: 75}
+  max_null_ratio: 0.20
+  value_ranges:
+    policy:    [-1.0, 25.0]
+    funding:   [-1.0, 25.0]
+    yield:     [-2.0, 25.0]
+    lending:   [0.0, 30.0]
+    inflation: [-5.0, 25.0]
