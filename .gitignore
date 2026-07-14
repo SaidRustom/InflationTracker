@@ -20,3 +20,6 @@ build/
 Thumbs.db
 .idea/
 .vscode/
+
+# Local Claude Code settings (personal, not team)
+.claude/settings.local.json
