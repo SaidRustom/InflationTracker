@@ -11,8 +11,14 @@ https://app.notion.com/p/39dcea51fedf81028e24e6f748c1482b
 **Status:** Plan 1 of 2 (data pipeline) **complete and merged to `main`** (2026-07-15) — ingest →
 transform → metrics → quality → build_web all green (22 tests, ruff clean) with a live BoC snapshot
 published to `site/data/`. **Next:** Plan 2 — static dashboard, Data-Trust + methodology pages,
-revision-diff check, CI workflows, GitHub Pages deploy. No git remote configured yet.
+revision-diff check, CI workflows, GitHub Pages deploy.
 **Owner:** said-rustom · Solo · Portfolio piece for a Bank of Canada Developer (Data Operations) application.
+
+**Remote:** `origin` → https://github.com/SaidRustom/InflationTracker (**private**, default branch
+`main`, pushed 2026-07-15). Open question for Plan 2: publishing GitHub Pages from a *private* repo
+requires a paid plan (Pro/Team/Enterprise); on a free account the repo must be public. Confirm the
+account plan before the Pages deploy step — and note the design calls this a *public* dashboard, so
+going public is likely the intended end state regardless.
 
 ## What this is
 A free, public web dashboard on the **Bank of Canada Valet API** visualizing the **monetary-policy
