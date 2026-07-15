@@ -8,3 +8,4 @@ series:
   - {id: CPI_TRIM,           kind: series, frequency: monthly, role: inflation, label_en: "Core inflation: CPI-trim",   label_fr: "Inflation fondamentale : IPC-tronq"}
   - {id: CPI_MEDIAN,         kind: series, frequency: monthly, role: inflation, label_en: "Core inflation: CPI-median", label_fr: "Inflation fondamentale : IPC-méd"}
   - {id: CPI_COMMON,         kind: series, frequency: monthly, role: inflation, label_en: "Core inflation: CPI-common", label_fr: "Inflation fondamentale : IPC-comm"}
+  - {id: STATIC_TOTALCPICHANGE, kind: series, frequency: monthly, role: headline, metric_key: cpi_headline, label_en: "Total CPI (headline)", label_fr: "IPC global (ensemble)"}

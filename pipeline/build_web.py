@@ -59,6 +59,7 @@ def build_web(
         "spread": metrics["household_spread"],
     }))
     paths.append(_write(out_dir, "panel_target.json", {
+        "headline": [_series_block(con, s) for s in by_role.get("headline", [])],
         "core": [_series_block(con, s) for s in by_role.get("inflation", [])],
         "band": {"low": 1.0, "high": 3.0},
     }))

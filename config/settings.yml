@@ -11,3 +11,4 @@ thresholds:
     yield:     [-2.0, 25.0]
     lending:   [0.0, 30.0]
     inflation: [-5.0, 25.0]
+    headline:  [-5.0, 25.0]
