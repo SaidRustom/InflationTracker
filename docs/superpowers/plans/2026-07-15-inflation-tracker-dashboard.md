@@ -20,6 +20,7 @@ Every task's requirements implicitly include this section.
 - **No JS framework, no bundler, no build step, no npm.** Vanilla ES modules only.
 - **No browser calls to the Valet API.** The page reads only `site/data/*.json`. (spec §14)
 - **Bilingual from day one.** Every user-facing string resolves through `site/i18n/{en,fr}.json`. **No hardcoded copy in HTML or JS.** (spec §14 — "no late retrofit")
+  - Clarification: English text *inside* a `[data-i18n]` element is a permitted pre-boot / no-JS fallback, because `applyStaticText` overwrites it on boot. It must never be the **only** source of a string. Any element holding user-facing text — **including `<title>`** — must carry a `data-i18n` key.
 - **Language via `?lang=en|fr`.** Decision 2026-07-15; **supersedes spec §12's URL-segment (`/en`, `/fr`)**. Default `en`; unknown values fall back to `en`.
 - **Bright lines (spec §2), non-negotiable:** no financial advice, no rate predictions, no "lock-in" nudges. Descriptive only. A disclaimer ships on the page. Never present a posted rate as a usable consumer rate; the spread is an **observed** quantity, never a derived prediction.
 - **Attribution:** BoC credit + a link to `https://www.bankofcanada.ca/terms/` must be visible on the page.
@@ -655,7 +656,7 @@ export async function loadJSON(name) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monetary-Policy Transmission &amp; Inflation Tracker</title>
+  <title data-i18n="app.title">Monetary-Policy Transmission &amp; Inflation Tracker</title>
   <link rel="stylesheet" href="./assets/css/app.css">
   <script src="./assets/vendor/echarts-6.1.0.min.js"></script>
 </head>
@@ -1494,6 +1495,14 @@ With the server running:
 - [ ] **Step 5: Full bilingual sweep**
 
 `browser_navigate` → `?lang=fr` and read the whole page. Assert **no English leaks** — every heading, note, readout, legend label and footer string is French. Any string rendering as a raw key (e.g. `panel.target.inside`) means a missing dictionary entry; fix it.
+
+Include the **browser tab title** — it is the easiest thing to miss because it is not on the page. Check it explicitly:
+
+```js
+() => document.title
+```
+
+Expected under `?lang=fr`: the French title, not the English one.
 
 Confirm the disclaimer and the BoC terms link are visible in both languages.
 
