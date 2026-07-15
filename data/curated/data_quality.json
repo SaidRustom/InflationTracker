@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T00:00:00",
+  "generated_at": "2026-07-15T00:00:00",
   "overall": "OK",
   "series": [
     {
@@ -56,7 +56,7 @@
       "series_id": "V122667780",
       "status": "OK",
       "checks": {
-        "freshness": "fresh: 74d old",
+        "freshness": "fresh: 75d old",
         "value_range": "within range",
         "monotonic": "no duplicate dates",
         "null_ratio": "nulls: 0%"
@@ -66,7 +66,7 @@
       "series_id": "CPI_TRIM",
       "status": "OK",
       "checks": {
-        "freshness": "fresh: 74d old",
+        "freshness": "fresh: 75d old",
         "value_range": "within range",
         "monotonic": "no duplicate dates",
         "null_ratio": "nulls: 0%"
@@ -76,7 +76,7 @@
       "series_id": "CPI_MEDIAN",
       "status": "OK",
       "checks": {
-        "freshness": "fresh: 74d old",
+        "freshness": "fresh: 75d old",
         "value_range": "within range",
         "monotonic": "no duplicate dates",
         "null_ratio": "nulls: 0%"
@@ -86,7 +86,17 @@
       "series_id": "CPI_COMMON",
       "status": "OK",
       "checks": {
-        "freshness": "fresh: 74d old",
+        "freshness": "fresh: 75d old",
+        "value_range": "within range",
+        "monotonic": "no duplicate dates",
+        "null_ratio": "nulls: 0%"
+      }
+    },
+    {
+      "series_id": "STATIC_TOTALCPICHANGE",
+      "status": "OK",
+      "checks": {
+        "freshness": "fresh: 75d old",
         "value_range": "within range",
         "monotonic": "no duplicate dates",
         "null_ratio": "nulls: 0%"
