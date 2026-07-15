@@ -32,7 +32,7 @@ async function boot() {
     await renderPolicy(panels, dict, lang);
   } catch (err) {
     console.error(err);
-    document.getElementById("load-error").hidden = false;
+    failed = true;
   }
 
   document.getElementById("load-error").hidden = !failed;
