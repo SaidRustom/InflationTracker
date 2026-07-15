@@ -23,3 +23,6 @@ Thumbs.db
 
 # Local Claude Code settings (personal, not team)
 .claude/settings.local.json
+
+# Serena MCP local cache/index (personal, not team)
+.serena/
