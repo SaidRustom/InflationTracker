@@ -1,5 +1,6 @@
 import { applyStaticText, currentLang, loadDict, otherLang } from "./i18n.js";
 import { loadJSON } from "./data.js";
+import { renderPolicy } from "./panels/policy.js";
 
 async function boot() {
   const lang = currentLang();
@@ -26,9 +27,12 @@ async function boot() {
     const quality = document.getElementById("overall-quality");
     quality.textContent = manifest.overall_quality;
     quality.dataset.status = manifest.overall_quality;
+
+    const panels = document.getElementById("panels");
+    await renderPolicy(panels, dict, lang);
   } catch (err) {
-    console.error("manifest", err);
-    failed = true;
+    console.error(err);
+    document.getElementById("load-error").hidden = false;
   }
 
   document.getElementById("load-error").hidden = !failed;
