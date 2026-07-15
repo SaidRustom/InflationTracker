@@ -1,6 +1,9 @@
 start_date: "2000-01-01"
 thresholds:
-  staleness_days: {daily: 7, weekly: 14, monthly: 75}
+  # monthly: CPI observations are dated to the month start but publish ~6 weeks later,
+  # so the newest observation legitimately reaches ~77d old just before the next
+  # release. 95 tolerates the normal cycle while still alarming on a dead series.
+  staleness_days: {daily: 7, weekly: 14, monthly: 95}
   max_null_ratio: 0.20
   value_ranges:
     policy:    [-1.0, 25.0]
