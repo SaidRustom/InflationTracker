@@ -8,10 +8,10 @@
 https://app.notion.com/p/39dcea51fedf81028e24e6f748c1482b
 (Projects DB · Stage: Planning · Lead: said-rustom)
 
-**Status:** Plan 1 of **3** (data pipeline) **complete and merged to `main`** (2026-07-15) — ingest →
-transform → metrics → quality → build_web all green (22 tests, ruff clean) with a live BoC snapshot
-published to `site/data/`. **Next:** Plan 2 — bilingual ECharts dashboard (M3), written and ready to
-execute. Plan 3 — Data-Trust + methodology pages, revision-diff check, CI workflows, Pages deploy (M4).
+**Status:** Plans **1 and 2 of 3 complete and merged to `main`** (2026-07-15). Plan 1 = pipeline;
+Plan 2 = the bilingual ECharts dashboard (M3) — four panels rendering the transmission chain from
+committed JSON, EN/FR via `?lang=`, **30 tests, ruff clean**. **Next: Plan 3 (M4)** — Data-Trust tab,
+methodology page, revision-diff check, `ci.yml` + `refresh.yml`, README, GitHub Pages deploy.
 **Owner:** said-rustom · Solo · Portfolio piece for a Bank of Canada Developer (Data Operations) application.
 
 **Remote:** `origin` → https://github.com/SaidRustom/InflationTracker (**private**, default branch
@@ -34,7 +34,7 @@ transform → data-quality → visualization), because the target role is data-e
 | Benchmark GoC yields | `BD.CDN.2YR.DQ.YLD`, `BD.CDN.5YR.DQ.YLD`, `BD.CDN.10YR.DQ.YLD` | Daily | `yield_2y/5y/10y` |
 | Chartered-bank lending rate | `V122667780` (insured 5yr+ fixed mortgage) | Monthly | `mortgage_5y_fixed` |
 | Core inflation vs target | `CPI_TRIM`, `CPI_MEDIAN`, `CPI_COMMON` | Monthly | — |
-| Headline inflation vs target | `STATIC_TOTALCPICHANGE` (3.2% on 2026-05-01) — *added by Plan 2 Task 2* | Monthly | `cpi_headline` |
+| Headline inflation vs target | `STATIC_TOTALCPICHANGE` (3.2% on 2026-05-01) | Monthly | `cpi_headline` |
 
 The design brainstorm named the `bond_yields_benchmark` group and the `A4_RATES_*` tables; the built
 pipeline resolves those to the individual series above (ingest fetches one file per series ID).
@@ -47,7 +47,22 @@ Series IDs belong in **config**, not code. A series can disappear — treat stal
 - `docs/superpowers/specs/2026-07-14-inflation-tracker-design.md` — approved design record (see its
   decisions log for the 2026-07-15 amendments: `?lang=` i18n, headline CPI, plan split, staleness fix).
 - `docs/superpowers/plans/2026-07-14-inflation-tracker-pipeline.md` — Plan 1 of 3 (pipeline). Done.
-- `docs/superpowers/plans/2026-07-15-inflation-tracker-dashboard.md` — Plan 2 of 3 (M3 dashboard). Ready.
+- `docs/superpowers/plans/2026-07-15-inflation-tracker-dashboard.md` — Plan 2 of 3 (M3 dashboard). Done.
+  Its "Deferred to Plan 3" section is the input to the next plan.
+
+## The site (`site/`, built by Plan 2)
+No build step, no framework, no npm. `python -m http.server 8000 --directory site` to run it locally.
+- Language via **`?lang=en|fr`** (default `en`, unknown falls back). *Amends spec §12's `/en` `/fr`.*
+- Every user-facing string lives in `site/i18n/{en,fr}.json`. English text inside a `[data-i18n]`
+  element is a permitted pre-boot/no-JS fallback — never a string's only source. `<title>` included.
+- The page **never calls Valet**; it reads only committed `site/data/*.json`.
+- ECharts **6.1.0 vendored** at `site/assets/vendor/` (Apache-2.0, keep the banner).
+- Readouts (2s10s slope, spread, months-in-band) are **read from the published JSON, never recomputed
+  in JS** — that is what keeps the page and the pipeline from disagreeing.
+- **No JS test runner, deliberately** (spec §14: don't over-invest in the frontend). Frontend changes
+  are verified by driving a real browser. Two cautions learned the hard way: the browser's disk cache
+  will happily serve a 200 for a file you just renamed (use a route interceptor to force a real
+  failure), and synthetic wheel events are untrusted in Chromium, so they never scroll the page.
 
 ## Working on this repo
 - Env: Python 3.12 in `.venv`. **Create it with stdlib `venv`, not `uv venv`** — uv's launcher stub
