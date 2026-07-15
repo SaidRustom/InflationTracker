@@ -5,6 +5,8 @@ import { renderMarkets } from "./panels/markets.js";
 import { renderHouseholds } from "./panels/households.js";
 import { renderTarget } from "./panels/target.js";
 
+const PANELS = [renderPolicy, renderMarkets, renderHouseholds, renderTarget];
+
 async function boot() {
   const lang = currentLang();
   document.documentElement.lang = lang;
@@ -30,15 +32,19 @@ async function boot() {
     const quality = document.getElementById("overall-quality");
     quality.textContent = manifest.overall_quality;
     quality.dataset.status = manifest.overall_quality;
-
-    const panels = document.getElementById("panels");
-    await renderPolicy(panels, dict, lang);
-    await renderMarkets(panels, dict, lang);
-    await renderHouseholds(panels, dict, lang);
-    await renderTarget(panels, dict, lang);
   } catch (err) {
-    console.error(err);
+    console.error("manifest", err);
     failed = true;
+  }
+
+  const root = document.getElementById("panels");
+  for (const render of PANELS) {
+    try {
+      await render(root, dict, lang);
+    } catch (err) {
+      console.error(render.name, err);
+      failed = true;
+    }
   }
 
   document.getElementById("load-error").hidden = !failed;

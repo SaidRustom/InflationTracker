@@ -5,7 +5,9 @@ import { baseOption, lineSeries, mountChart } from "../charts.js";
 export async function renderTarget(root, dict, lang) {
   const data = await loadJSON("panel_target.json");
   const band = data.band;
-  const bm = data.band_months;
+  const bm = data.band_months ?? {
+    months_inside: 0, latest_date: null, latest_value: null, latest_inside: false,
+  };
 
   const inside = Boolean(bm.latest_inside);
   const statusKey = inside ? "panel.target.inside" : "panel.target.outside";
