@@ -3,6 +3,7 @@ import { loadJSON } from "./data.js";
 import { renderPolicy } from "./panels/policy.js";
 import { renderMarkets } from "./panels/markets.js";
 import { renderHouseholds } from "./panels/households.js";
+import { renderTarget } from "./panels/target.js";
 
 async function boot() {
   const lang = currentLang();
@@ -34,6 +35,7 @@ async function boot() {
     await renderPolicy(panels, dict, lang);
     await renderMarkets(panels, dict, lang);
     await renderHouseholds(panels, dict, lang);
+    await renderTarget(panels, dict, lang);
   } catch (err) {
     console.error(err);
     failed = true;

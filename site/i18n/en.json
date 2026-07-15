@@ -23,5 +23,14 @@
   "panel.households.note": "Banks fund 5-year fixed mortgages largely off the 5-year Government of Canada yield, so the lending rate tends to sit above it. The gap shown is the observed spread between the two published series — a description of what happened, not a prediction and not a rate you can be quoted.",
   "panel.households.axis": "Rate (%)",
   "panel.households.spreadLabel": "Observed spread (latest)",
-  "panel.households.spreadSeries": "Observed spread (mortgage − 5-year yield)"
+  "panel.households.spreadSeries": "Observed spread (mortgage − 5-year yield)",
+  "panel.target.title": "4 · The target — CPI vs the 1–3% control range",
+  "panel.target.note": "The Bank's inflation-control target is defined on total CPI, with a 1–3% control range shown shaded. Core measures (trim, median, common) strip out volatile components to show the underlying trend.",
+  "panel.target.axis": "Year-over-year change (%)",
+  "panel.target.bandName": "1–3% control range",
+  "panel.target.latestLabel": "Total CPI (latest)",
+  "panel.target.streakLabel": "Consecutive months inside the range",
+  "panel.target.statusLabel": "Latest reading",
+  "panel.target.inside": "Inside the range",
+  "panel.target.outside": "Outside the range"
 }
