@@ -979,9 +979,13 @@ import { renderPolicy } from "./panels/policy.js";
     await renderPolicy(panels, dict, lang);
   } catch (err) {
     console.error(err);
-    document.getElementById("load-error").hidden = false;
+    failed = true;
   }
 ```
+
+> **Set `failed = true` — do not set `load-error.hidden` directly here.** `boot()` ends with
+> `load-error.hidden = !failed`, so a catch that only flips `hidden` gets silently undone by that
+> final line and the banner never appears.
 
 - [ ] **Step 5: Verify in a real browser**
 
