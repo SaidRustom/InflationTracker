@@ -11,5 +11,12 @@
   "app.disclaimer": "À titre informatif seulement. Cette page décrit des données publiées. Il ne s'agit pas de conseils financiers et elle ne prévoit ni les taux d'intérêt ni l'inflation.",
   "panel.policy.title": "1 · Taux directeur et financement à un jour",
   "panel.policy.note": "La Banque fixe la cible du taux du financement à un jour à huit dates préétablies par année. Le CORRA est le taux auquel le financement à un jour se négocie réellement, et il suit la cible de près.",
-  "panel.policy.axis": "Taux (%)"
+  "panel.policy.axis": "Taux (%)",
+  "panel.markets.title": "2 · Vers les marchés — rendements de référence GdC",
+  "panel.markets.note": "Le taux directeur ancre la partie courte de la courbe. Les rendements à plus long terme reflètent aussi les attentes. L'écart 2 ans-10 ans correspond au rendement à 10 ans moins celui à 2 ans; lorsqu'il est négatif, la courbe est inversée.",
+  "panel.markets.axis": "Rendement (%)",
+  "panel.markets.slopeLabel": "Écart 2 ans-10 ans (dernier)",
+  "panel.markets.curveLabel": "Forme de la courbe",
+  "panel.markets.inverted": "Inversée",
+  "panel.markets.normal": "Non inversée"
 }

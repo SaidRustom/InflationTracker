@@ -11,5 +11,12 @@
   "app.disclaimer": "For information only. This page describes published data. It is not financial advice, and it does not forecast interest rates or inflation.",
   "panel.policy.title": "1 · Policy rate & overnight funding",
   "panel.policy.note": "The Bank sets the target for the overnight rate on eight fixed dates a year. CORRA is the rate at which overnight funding actually transacts, and it tracks the target closely.",
-  "panel.policy.axis": "Rate (%)"
+  "panel.policy.axis": "Rate (%)",
+  "panel.markets.title": "2 · To markets — benchmark GoC yields",
+  "panel.markets.note": "The policy rate anchors the short end of the curve. Longer yields also reflect expectations. The 2s10s slope is the 10-year yield minus the 2-year yield; when it is negative the curve is inverted.",
+  "panel.markets.axis": "Yield (%)",
+  "panel.markets.slopeLabel": "2s10s slope (latest)",
+  "panel.markets.curveLabel": "Curve shape",
+  "panel.markets.inverted": "Inverted",
+  "panel.markets.normal": "Not inverted"
 }
