@@ -26,3 +26,6 @@ Thumbs.db
 
 # Serena MCP local cache/index (personal, not team)
 .serena/
+
+# Playwright MCP verification artifacts (page snapshots, not part of the build)
+.playwright-mcp/

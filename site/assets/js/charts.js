@@ -6,7 +6,7 @@ export function baseOption({ yAxisName = "%" } = {}) {
   return {
     grid: { left: 52, right: 18, top: 28, bottom: 56 },
     tooltip: { trigger: "axis", axisPointer: { type: "line" } },
-    legend: { top: 0, icon: "roundRect" },
+    legend: { type: "scroll", top: 0, icon: "roundRect" },
     xAxis: { type: "time", axisLine: { lineStyle: { color: "#9aa0a6" } } },
     yAxis: {
       type: "value",
@@ -15,7 +15,10 @@ export function baseOption({ yAxisName = "%" } = {}) {
       splitLine: { lineStyle: { color: "#eef0f3" } },
     },
     dataZoom: [
-      { type: "inside" },
+      // The slider below gives deliberate zoom control. Wheel-zoom would otherwise
+      // swallow page scroll: ECharts' inside handler stops propagation, so a reader
+      // scrolling past a chart gets captured and silently rescales the time axis.
+      { type: "inside", zoomOnMouseWheel: false },
       { type: "slider", height: 20, bottom: 12 },
     ],
   };
