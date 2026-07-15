@@ -75,3 +75,6 @@ def test_panel_target_separates_headline_from_core(tmp_path):
     # headline must not leak into core
     assert [s["id"] for s in target["core"]] == ["CPI_TRIM"]
     assert target["band"] == {"low": 1.0, "high": 3.0}
+    assert target["band_months"]["latest_value"] == 3.2
+    assert target["band_months"]["latest_inside"] is False
+    assert target["band_months"]["months_inside"] == 0

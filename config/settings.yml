@@ -1,4 +1,5 @@
 start_date: "2000-01-01"
+inflation_band: {low: 1.0, high: 3.0}
 thresholds:
   # monthly: CPI observations are dated to the month start but publish ~6 weeks later,
   # so the newest observation legitimately reaches ~77d old just before the next
