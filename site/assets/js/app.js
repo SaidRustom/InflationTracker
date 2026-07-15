@@ -2,6 +2,7 @@ import { applyStaticText, currentLang, loadDict, otherLang } from "./i18n.js";
 import { loadJSON } from "./data.js";
 import { renderPolicy } from "./panels/policy.js";
 import { renderMarkets } from "./panels/markets.js";
+import { renderHouseholds } from "./panels/households.js";
 
 async function boot() {
   const lang = currentLang();
@@ -32,6 +33,7 @@ async function boot() {
     const panels = document.getElementById("panels");
     await renderPolicy(panels, dict, lang);
     await renderMarkets(panels, dict, lang);
+    await renderHouseholds(panels, dict, lang);
   } catch (err) {
     console.error(err);
     failed = true;

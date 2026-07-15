@@ -18,5 +18,10 @@
   "panel.markets.slopeLabel": "2s10s slope (latest)",
   "panel.markets.curveLabel": "Curve shape",
   "panel.markets.inverted": "Inverted",
-  "panel.markets.normal": "Not inverted"
+  "panel.markets.normal": "Not inverted",
+  "panel.households.title": "3 · To households — lending rates",
+  "panel.households.note": "Banks fund 5-year fixed mortgages largely off the 5-year Government of Canada yield, so the lending rate tends to sit above it. The gap shown is the observed spread between the two published series — a description of what happened, not a prediction and not a rate you can be quoted.",
+  "panel.households.axis": "Rate (%)",
+  "panel.households.spreadLabel": "Observed spread (latest)",
+  "panel.households.spreadSeries": "Observed spread (mortgage − 5-year yield)"
 }

@@ -18,5 +18,10 @@
   "panel.markets.slopeLabel": "Écart 2 ans-10 ans (dernier)",
   "panel.markets.curveLabel": "Forme de la courbe",
   "panel.markets.inverted": "Inversée",
-  "panel.markets.normal": "Non inversée"
+  "panel.markets.normal": "Non inversée",
+  "panel.households.title": "3 · Vers les ménages — taux des prêts",
+  "panel.households.note": "Les banques financent les prêts hypothécaires fixes de 5 ans en grande partie à partir du rendement des obligations du gouvernement du Canada à 5 ans; le taux des prêts se situe donc généralement au-dessus. L'écart présenté est l'écart observé entre les deux séries publiées — une description de ce qui s'est produit, et non une prévision ni un taux qui pourrait vous être offert.",
+  "panel.households.axis": "Taux (%)",
+  "panel.households.spreadLabel": "Écart observé (dernier)",
+  "panel.households.spreadSeries": "Écart observé (hypothèque − rendement 5 ans)"
 }
