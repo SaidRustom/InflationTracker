@@ -1,0 +1,12 @@
+{
+  "app.title": "Transmission de la politique monétaire et suivi de l'inflation",
+  "app.subtitle": "Comment le taux directeur de la Banque du Canada se transmet aux marchés, aux ménages et aux prix.",
+  "app.langSwitch": "English",
+  "app.lastRefreshed": "Dernière mise à jour",
+  "app.dataQuality": "Qualité des données",
+  "app.loading": "Chargement…",
+  "app.error": "Impossible de charger les données. La page affiche le dernier instantané publié.",
+  "app.source": "Source : API Valet de la Banque du Canada",
+  "app.terms": "Conditions d'utilisation",
+  "app.disclaimer": "À titre informatif seulement. Cette page décrit des données publiées. Il ne s'agit pas de conseils financiers et elle ne prévoit ni les taux d'intérêt ni l'inflation."
+}

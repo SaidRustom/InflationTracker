@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="app.title">Monetary-Policy Transmission &amp; Inflation Tracker</title>
+  <link rel="stylesheet" href="./assets/css/app.css">
+  <script src="./assets/vendor/echarts-6.1.0.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-text">
+      <h1 data-i18n="app.title">Monetary-Policy Transmission &amp; Inflation Tracker</h1>
+      <p class="subtitle" data-i18n="app.subtitle"></p>
+    </div>
+    <a id="lang-switch" class="lang-switch" href="?lang=fr" data-i18n="app.langSwitch">Français</a>
+  </header>
+
+  <p id="status-bar" class="status-bar">
+    <span data-i18n="app.lastRefreshed"></span>:
+    <strong id="last-refreshed">—</strong>
+    <span class="sep">·</span>
+    <span data-i18n="app.dataQuality"></span>:
+    <strong id="overall-quality" class="quality">—</strong>
+  </p>
+
+  <p id="load-error" class="load-error" hidden data-i18n="app.error"></p>
+
+  <main id="panels"></main>
+
+  <footer class="site-footer">
+    <p class="disclaimer" data-i18n="app.disclaimer"></p>
+    <p>
+      <span data-i18n="app.source"></span> ·
+      <a href="https://www.bankofcanada.ca/terms/" data-i18n="app.terms" rel="noopener">Terms of use</a>
+    </p>
+  </footer>
+
+  <script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>

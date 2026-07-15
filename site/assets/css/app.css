@@ -1,0 +1,82 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1c1c1e;
+  --muted: #5f6368;
+  --line: #e2e4e8;
+  --accent: #96172e; /* Bank of Canada red */
+  --ok: #1f7a4d;
+  --warn: #9a6700;
+  --fail: #b3261e;
+  --panel-radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 1.5rem clamp(1rem, 4vw, 3rem) 3rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.site-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 1rem;
+}
+
+.site-header h1 { margin: 0 0 .25rem; font-size: clamp(1.25rem, 3vw, 1.75rem); }
+.subtitle { margin: 0; color: var(--muted); max-width: 60ch; }
+
+.lang-switch {
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .35rem .9rem;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: .875rem;
+}
+.lang-switch:hover { border-color: var(--accent); color: var(--accent); }
+
+.status-bar { color: var(--muted); font-size: .875rem; margin: 1rem 0 0; }
+.status-bar .sep { margin: 0 .5rem; }
+.quality[data-status="OK"] { color: var(--ok); }
+.quality[data-status="WARN"] { color: var(--warn); }
+.quality[data-status="FAIL"] { color: var(--fail); }
+
+.load-error {
+  border: 1px solid var(--fail);
+  border-radius: var(--panel-radius);
+  padding: .75rem 1rem;
+  color: var(--fail);
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: var(--panel-radius);
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+}
+.panel h2 { margin: 0 0 .25rem; font-size: 1.125rem; }
+.panel .panel-note { margin: 0 0 1rem; color: var(--muted); font-size: .875rem; max-width: 75ch; }
+.chart { width: 100%; height: 340px; }
+
+.readout { display: flex; flex-wrap: wrap; gap: 1.5rem; margin: 0 0 1rem; }
+.readout div { display: flex; flex-direction: column; }
+.readout dt, .readout .readout-label { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+.readout .readout-value { font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.flag-inverted, .flag-outside { color: var(--fail); }
+.flag-normal, .flag-inside { color: var(--ok); }
+
+.site-footer { margin-top: 2.5rem; border-top: 1px solid var(--line); padding-top: 1rem; color: var(--muted); font-size: .8125rem; }
+.disclaimer { max-width: 75ch; }
+
+@media (max-width: 640px) {
+  .site-header { flex-direction: column; }
+  .chart { height: 280px; }
+}

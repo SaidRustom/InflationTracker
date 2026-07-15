@@ -1,0 +1,12 @@
+{
+  "app.title": "Monetary-Policy Transmission & Inflation Tracker",
+  "app.subtitle": "How the Bank of Canada's policy rate travels through markets to households and prices.",
+  "app.langSwitch": "Français",
+  "app.lastRefreshed": "Last refreshed",
+  "app.dataQuality": "Data quality",
+  "app.loading": "Loading…",
+  "app.error": "Could not load data. The page shows the last published snapshot.",
+  "app.source": "Source: Bank of Canada Valet API",
+  "app.terms": "Terms of use",
+  "app.disclaimer": "For information only. This page describes published data. It is not financial advice, and it does not forecast interest rates or inflation."
+}
