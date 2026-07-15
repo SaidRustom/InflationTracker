@@ -8,10 +8,10 @@
 https://app.notion.com/p/39dcea51fedf81028e24e6f748c1482b
 (Projects DB · Stage: Planning · Lead: said-rustom)
 
-**Status:** Plan 1 of 2 (data pipeline) **complete and merged to `main`** (2026-07-15) — ingest →
+**Status:** Plan 1 of **3** (data pipeline) **complete and merged to `main`** (2026-07-15) — ingest →
 transform → metrics → quality → build_web all green (22 tests, ruff clean) with a live BoC snapshot
-published to `site/data/`. **Next:** Plan 2 — static dashboard, Data-Trust + methodology pages,
-revision-diff check, CI workflows, GitHub Pages deploy.
+published to `site/data/`. **Next:** Plan 2 — bilingual ECharts dashboard (M3), written and ready to
+execute. Plan 3 — Data-Trust + methodology pages, revision-diff check, CI workflows, Pages deploy (M4).
 **Owner:** said-rustom · Solo · Portfolio piece for a Bank of Canada Developer (Data Operations) application.
 
 **Remote:** `origin` → https://github.com/SaidRustom/InflationTracker (**private**, default branch
@@ -34,6 +34,7 @@ transform → data-quality → visualization), because the target role is data-e
 | Benchmark GoC yields | `BD.CDN.2YR.DQ.YLD`, `BD.CDN.5YR.DQ.YLD`, `BD.CDN.10YR.DQ.YLD` | Daily | `yield_2y/5y/10y` |
 | Chartered-bank lending rate | `V122667780` (insured 5yr+ fixed mortgage) | Monthly | `mortgage_5y_fixed` |
 | Core inflation vs target | `CPI_TRIM`, `CPI_MEDIAN`, `CPI_COMMON` | Monthly | — |
+| Headline inflation vs target | `STATIC_TOTALCPICHANGE` (3.2% on 2026-05-01) — *added by Plan 2 Task 2* | Monthly | `cpi_headline` |
 
 The design brainstorm named the `bond_yields_benchmark` group and the `A4_RATES_*` tables; the built
 pipeline resolves those to the individual series above (ingest fetches one file per series ID).
@@ -43,8 +44,10 @@ Series IDs belong in **config**, not code. A series can disappear — treat stal
 
 ## Doc map
 - **Notion page** — source of truth / tracker (link above).
-- `docs/superpowers/specs/2026-07-14-inflation-tracker-design.md` — approved design record.
-- `docs/superpowers/plans/2026-07-14-inflation-tracker-pipeline.md` — Plan 1 of 2 (pipeline). Done.
+- `docs/superpowers/specs/2026-07-14-inflation-tracker-design.md` — approved design record (see its
+  decisions log for the 2026-07-15 amendments: `?lang=` i18n, headline CPI, plan split, staleness fix).
+- `docs/superpowers/plans/2026-07-14-inflation-tracker-pipeline.md` — Plan 1 of 3 (pipeline). Done.
+- `docs/superpowers/plans/2026-07-15-inflation-tracker-dashboard.md` — Plan 2 of 3 (M3 dashboard). Ready.
 
 ## Working on this repo
 - Env: Python 3.12 in `.venv`. **Create it with stdlib `venv`, not `uv venv`** — uv's launcher stub

@@ -134,6 +134,7 @@ onto a per-panel date spine (monthly CPI vs daily rates handled explicitly, neve
 | Benchmark GoC yields | group `bond_yields_benchmark` (2/3/5/7/10yr) | Daily (business days) |
 | Chartered-bank lending rates | `A4_RATES_MORTGAGES`, `A4_RATES_CONSUMER` | Weekly/Monthly |
 | Core inflation vs target | `CPI_TRIM`, `CPI_MEDIAN`, `CPI_COMMON` (group `ATABLE_INFLATIOON_INDICATORS`) | Monthly |
+| Headline inflation vs target | `STATIC_TOTALCPICHANGE` — 3.2% on 2026-05-01 *(verified live 2026-07-15)* | Monthly |
 
 Base: `https://www.bankofcanada.ca/valet/` · no auth · JSON/CSV/XML · `?recent=N` / `start_date`/`end_date`.
 **Series IDs live in `config/series.yml`, not code.** Precedent for churn: BoC discontinued the monthly
@@ -185,8 +186,11 @@ the Data-Trust tab. This is the JD's "data quality patterns / validation / metad
 ## 12. Hosting, i18n & CI/CD
 
 - **Hosting** — GitHub Pages serves `site/`. No server, no DB.
-- **i18n** — EN/FR dictionaries in `site/i18n/`, culture via URL segment (`/en`, `/fr`); the series
+- **i18n** — EN/FR dictionaries in `site/i18n/`, culture via **query parameter (`?lang=en|fr`)**; the series
   dimension carries `label_en` / `label_fr`.
+  > **Amended 2026-07-15.** Originally specified as a URL segment (`/en`, `/fr`). With no build step,
+  > segments would mean duplicating the HTML shell per language. `?lang=` stays a real, shareable URL.
+  > See the decisions log.
 - **Orchestration** — GitHub Actions cron (daily) runs the pipeline and redeploys.
 
 ## 13. Milestones (v1)
@@ -214,6 +218,20 @@ the Data-Trust tab. This is the JD's "data quality patterns / validation / metad
 - **Architecture:** Approach A ("data product + custom dashboard") over Evidence.dev / SPA. *(2026-07-14)*
 - **V1 scope:** core transmission dashboard + Data-Trust tab + SQL-first DuckDB transforms with tests/CI +
   bilingual EN/FR + methodology/lineage writeup. *(2026-07-14)*
+- **i18n via `?lang=en|fr`, not `/en` `/fr` URL segments.** The site has no build step, so URL segments
+  would require duplicating the HTML shell per language for no reader-visible gain; `?lang=` is still a
+  real shareable link. **Amends §12.** *(2026-07-15)*
+- **Headline CPI (`STATIC_TOTALCPICHANGE`) added to `config/series.yml` under a new `headline` role.**
+  §8 panel 4 always called for "headline CPI + core", but only core was ever configured — the spec was
+  right and the config was incomplete. The inflation-control target is defined on *total* CPI, so panel 4
+  needs it. A distinct role keeps it out of `panel_target.core`, which maps from `role=inflation`.
+  **Amends §7.** *(2026-07-15)*
+- **Delivery split into Plan 2 (M3 dashboard) + Plan 3 (M4 Data-Trust, methodology, CI, deploy),** so each
+  plan ships reviewable software on its own. Supersedes the earlier "Plan 2 of 2" framing. *(2026-07-15)*
+- **Monthly staleness threshold 75d → 95d.** Monthly observations are dated to the month start but publish
+  ~6 weeks later, so the newest CPI legitimately reaches ~77d old before the next release. 75d sat below
+  that high-water mark and would have false-FAILed the pipeline from 2026-07-16. **Refines §9 freshness.**
+  *(2026-07-15)*
 
 ## 16. References
 
