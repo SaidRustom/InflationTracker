@@ -15,10 +15,12 @@ export function baseOption({ yAxisName = "%" } = {}) {
       splitLine: { lineStyle: { color: "#eef0f3" } },
     },
     dataZoom: [
-      // The slider below gives deliberate zoom control. Wheel-zoom would otherwise
-      // swallow page scroll: ECharts' inside handler stops propagation, so a reader
-      // scrolling past a chart gets captured and silently rescales the time axis.
-      { type: "inside", zoomOnMouseWheel: false },
+      // The slider below is the zoom control; drag still pans. Wheel-zoom is locked
+      // off because ECharts' inside roam controller preventDefaults/stopPropagates
+      // wheel events - on a page of four stacked charts that strands a reader
+      // mid-scroll. zoomOnMouseWheel alone only suppresses the rescale, not the
+      // event capture; zoomLock is what restores page scrolling.
+      { type: "inside", zoomLock: true },
       { type: "slider", height: 20, bottom: 12 },
     ],
   };
