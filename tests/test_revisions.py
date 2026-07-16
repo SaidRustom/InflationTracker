@@ -215,6 +215,22 @@ def test_ledger_roundtrips(tmp_path):
     assert ledger_to_dict(ledger)["events"][0]["kind"] == "revised"
 
 
+def test_write_ledger_is_atomic_and_leaves_no_temp_file(tmp_path):
+    # write_ledger must go through a temp file + os.replace, not a plain write_text,
+    # so a crash mid-write can never leave a truncated ledger at `path`. We can't
+    # simulate a crash mid-write here; what we CAN assert is the visible contract:
+    # the file round-trips exactly, and no stray temp file is left behind next to it.
+    path = tmp_path / "revisions.json"
+    ledger = append_events(
+        load_ledger(path, default_watching_since="2026-07-14"),
+        [_event()],
+        last_checked="2026-06-20",
+    )
+    write_ledger(ledger, path)
+    assert load_ledger(path, default_watching_since="ignored") == ledger
+    assert list(tmp_path.iterdir()) == [path]
+
+
 def test_corrupt_ledger_raises_and_does_not_reset(tmp_path):
     path = tmp_path / "revisions.json"
     path.write_text("{not json", encoding="utf-8")

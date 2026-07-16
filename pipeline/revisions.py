@@ -1,7 +1,9 @@
 import json
+import os
 import re
 import shutil
 import sys
+import tempfile
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
@@ -163,12 +165,21 @@ def ledger_to_dict(ledger: Ledger) -> dict:
 
 
 def write_ledger(ledger: Ledger, path: Path) -> None:
+    """Write the ledger atomically: a crash or disk-full mid-write must never leave a
+    truncated file at `path`. Write to a temp file in the same directory (so the
+    final os.replace is a same-filesystem rename, atomic on both POSIX and Windows),
+    then swap it in. The temp file is the only thing that can end up half-written."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(ledger_to_dict(ledger), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    payload = json.dumps(ledger_to_dict(ledger), ensure_ascii=False, indent=2)
+    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(payload)
+        os.replace(tmp_name, path)
+    except BaseException:
+        Path(tmp_name).unlink(missing_ok=True)
+        raise
 
 
 def _vintage_dirs(raw_root: Path) -> list[Path]:
