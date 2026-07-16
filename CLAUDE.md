@@ -52,6 +52,10 @@ Series IDs belong in **config**, not code. A series can disappear — treat stal
 - **Notion page** — source of truth / tracker (link above).
 - `docs/superpowers/specs/2026-07-14-inflation-tracker-design.md` — approved design record (see its
   decisions log for the 2026-07-15 amendments: `?lang=` i18n, headline CPI, plan split, staleness fix).
+- `docs/superpowers/specs/2026-07-16-revision-diff-design.md` — approved design for the **revision-diff**,
+  Plan 3's headline feature. Amends §9/§12. Key rule: revisions are detected by diffing **retained raw
+  vintages re-parsed with today's parser** — never the curated parquet or published JSON, because those
+  compare old code's output to new code's output and would attribute our own commits to the Bank.
 - `docs/superpowers/plans/2026-07-14-inflation-tracker-pipeline.md` — Plan 1 of 3 (pipeline). Done.
 - `docs/superpowers/plans/2026-07-15-inflation-tracker-dashboard.md` — Plan 2 of 3 (M3 dashboard). Done.
   Its "Deferred to Plan 3" section is the input to the next plan.
