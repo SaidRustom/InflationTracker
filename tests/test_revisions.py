@@ -245,3 +245,19 @@ def test_ledger_that_is_not_an_object_raises(tmp_path):
     path.write_text("null", encoding="utf-8")
     with pytest.raises(RevisionLedgerError):
         load_ledger(path, default_watching_since="2026-07-14")
+
+
+def test_ledger_with_invalid_utf8_raises(tmp_path):
+    path = tmp_path / "revisions.json"
+    # File contains invalid UTF-8 bytes (e.g., from a crash mid-write)
+    path.write_bytes(b'\xff\xfe{"a":1}')
+    with pytest.raises(RevisionLedgerError):
+        load_ledger(path, default_watching_since="2026-07-14")
+
+
+def test_ledger_path_that_is_directory_raises(tmp_path):
+    path = tmp_path / "revisions.json"
+    # Path is a directory, not a file
+    path.mkdir()
+    with pytest.raises(RevisionLedgerError):
+        load_ledger(path, default_watching_since="2026-07-14")

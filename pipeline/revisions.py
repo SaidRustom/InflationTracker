@@ -101,8 +101,8 @@ def load_ledger(path: Path, default_watching_since: str) -> Ledger:
         )
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise RevisionLedgerError(f"revisions ledger at {path} is corrupt: {exc}") from exc
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
+        raise RevisionLedgerError(f"revisions ledger at {path} is unreadable: {exc}") from exc
 
     if not isinstance(raw, dict):
         raise RevisionLedgerError(f"revisions ledger at {path} is not a JSON object")
