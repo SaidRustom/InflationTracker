@@ -9,6 +9,7 @@
   "app.source": "Source: Bank of Canada Valet API",
   "app.terms": "Terms of use",
   "app.disclaimer": "For information only. This page describes published data. It is not financial advice, and it does not forecast interest rates or inflation.",
+  "tooltip.asOf": "as of",
   "panel.policy.title": "1 · Policy rate & overnight funding",
   "panel.policy.note": "The Bank sets the target for the overnight rate on eight fixed dates a year. CORRA is the rate at which overnight funding actually transacts, and it tracks the target closely.",
   "panel.policy.axis": "Rate (%)",

@@ -37,5 +37,7 @@ export async function renderMarkets(root, dict, lang) {
     ...data.yields.map((block) => lineSeries(block, lang)),
   ];
 
-  mountChart(section.querySelector("#chart-markets"), option);
+  mountChart(section.querySelector("#chart-markets"), option, {
+    asOfLabel: t(dict, "tooltip.asOf"),
+  });
 }

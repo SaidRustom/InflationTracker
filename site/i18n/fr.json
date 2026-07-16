@@ -9,6 +9,7 @@
   "app.source": "Source : API Valet de la Banque du Canada",
   "app.terms": "Conditions d'utilisation",
   "app.disclaimer": "À titre informatif seulement. Cette page décrit des données publiées. Il ne s'agit pas de conseils financiers et elle ne prévoit ni les taux d'intérêt ni l'inflation.",
+  "tooltip.asOf": "au",
   "panel.policy.title": "1 · Taux directeur et financement à un jour",
   "panel.policy.note": "La Banque fixe la cible du taux du financement à un jour à huit dates préétablies par année. Le CORRA est le taux auquel le financement à un jour se négocie réellement, et il suit la cible de près.",
   "panel.policy.axis": "Taux (%)",

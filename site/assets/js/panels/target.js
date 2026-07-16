@@ -55,5 +55,7 @@ export async function renderTarget(root, dict, lang) {
   );
   option.series = [...headlineSeries, ...coreSeries];
 
-  mountChart(section.querySelector("#chart-target"), option);
+  mountChart(section.querySelector("#chart-target"), option, {
+    asOfLabel: t(dict, "tooltip.asOf"),
+  });
 }

@@ -36,5 +36,7 @@ export async function renderHouseholds(root, dict, lang) {
     },
   ];
 
-  mountChart(section.querySelector("#chart-households"), option);
+  mountChart(section.querySelector("#chart-households"), option, {
+    asOfLabel: t(dict, "tooltip.asOf"),
+  });
 }
