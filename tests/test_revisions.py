@@ -295,3 +295,21 @@ def test_prune_is_a_noop_below_the_limit(tmp_path):
     _dirs(tmp_path, "2026-07-14", "2026-07-15")
     assert prune_vintages(tmp_path, keep=2) == []
     assert len(list(tmp_path.iterdir())) == 2
+
+
+def test_stray_non_iso_directories_are_ignored(tmp_path):
+    # Create ISO-date vintages and stray directories
+    _dirs(tmp_path, "2026-07-14", "2026-07-15", "archive", ".tmp")
+    # Stray dirs should not affect baseline discovery
+    assert find_baseline_dir(tmp_path, "2026-07-15").name == "2026-07-14"
+    # Stray dirs should not be pruned and should not affect pruning decision
+    removed = prune_vintages(tmp_path, keep=1)
+    assert sorted(p.name for p in removed) == ["2026-07-14"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == [".tmp", "2026-07-15", "archive"]
+
+
+def test_prune_with_keep_zero_removes_all_vintages(tmp_path):
+    _dirs(tmp_path, "2026-07-13", "2026-07-14", "2026-07-15")
+    removed = prune_vintages(tmp_path, keep=0)
+    assert sorted(p.name for p in removed) == ["2026-07-13", "2026-07-14", "2026-07-15"]
+    assert len(list(tmp_path.iterdir())) == 0

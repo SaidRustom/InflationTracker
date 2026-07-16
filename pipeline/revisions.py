@@ -1,9 +1,12 @@
 import json
+import re
 import shutil
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
 from pipeline.parse import flatten_observations
+
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def observations_from_vintage(vintage_dir: Path) -> dict[tuple[str, str], float | None]:
@@ -155,7 +158,13 @@ def _vintage_dirs(raw_root: Path) -> list[Path]:
     root = Path(raw_root)
     if not root.exists():
         return []
-    return sorted((p for p in root.iterdir() if p.is_dir()), key=lambda p: p.name)
+    # Names must be ISO dates: both callers rely on lexicographic order being
+    # chronological, and prune_vintages rmtree's what it deems oldest. A stray
+    # directory would sort into that ordering and cost a real vintage.
+    return sorted(
+        (p for p in root.iterdir() if p.is_dir() and _ISO_DATE.fullmatch(p.name)),
+        key=lambda p: p.name,
+    )
 
 
 def find_baseline_dir(raw_root: Path, run_date: str) -> Path | None:
@@ -172,7 +181,7 @@ def prune_vintages(raw_root: Path, keep: int = 2) -> list[Path]:
     baseline in exchange for nothing.
     """
     dirs = _vintage_dirs(raw_root)
-    removed = dirs[:-keep] if len(dirs) > keep else []
+    removed = dirs[: len(dirs) - keep] if len(dirs) > keep else []
     for path in removed:
         shutil.rmtree(path)
     return removed
