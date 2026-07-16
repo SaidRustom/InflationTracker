@@ -237,3 +237,11 @@ def test_ledger_with_non_list_events_raises(tmp_path):
     )
     with pytest.raises(RevisionLedgerError):
         load_ledger(path, default_watching_since="2026-07-14")
+
+
+def test_ledger_that_is_not_an_object_raises(tmp_path):
+    path = tmp_path / "revisions.json"
+    # Entire file is null instead of an object
+    path.write_text("null", encoding="utf-8")
+    with pytest.raises(RevisionLedgerError):
+        load_ledger(path, default_watching_since="2026-07-14")

@@ -104,6 +104,9 @@ def load_ledger(path: Path, default_watching_since: str) -> Ledger:
     except json.JSONDecodeError as exc:
         raise RevisionLedgerError(f"revisions ledger at {path} is corrupt: {exc}") from exc
 
+    if not isinstance(raw, dict):
+        raise RevisionLedgerError(f"revisions ledger at {path} is not a JSON object")
+
     for key in ("watching_since", "last_checked", "events"):
         if key not in raw:
             raise RevisionLedgerError(f"revisions ledger at {path} is missing {key!r}")
