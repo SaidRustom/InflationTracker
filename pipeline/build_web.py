@@ -34,10 +34,19 @@ def revisions_payload(config: AppConfig, revisions: dict | None) -> dict:
     """Cap the published event list, enrich with EN/FR labels, always state the total.
 
     The ledger stays label-free and complete; this is the view. total_events is what
-    lets the page say "showing 100 of 342" instead of silently truncating.
+    lets the page say "showing 100 of 342" instead of silently truncating. `status`
+    names the never-checked state explicitly - with watching_since/last_checked both
+    null, a naive renderer would say "no revisions" when the truth is "detection has
+    not run yet", which is exactly the lie this whole feature exists to prevent.
     """
     if revisions is None:
-        return {"watching_since": None, "last_checked": None, "events": [], "total_events": 0}
+        return {
+            "watching_since": None,
+            "last_checked": None,
+            "events": [],
+            "total_events": 0,
+            "status": "never_checked",
+        }
 
     labels = {s.id: (s.label_en, s.label_fr) for s in config.series}
     events = revisions.get("events", [])
@@ -54,6 +63,7 @@ def revisions_payload(config: AppConfig, revisions: dict | None) -> dict:
         "last_checked": revisions.get("last_checked"),
         "events": enriched,
         "total_events": len(events),
+        "status": "watching",
     }
 
 

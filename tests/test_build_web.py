@@ -113,6 +113,14 @@ def test_revisions_payload_is_enriched_with_labels():
     assert out["last_checked"] == "2026-07-16"
 
 
+def test_revisions_payload_from_a_real_ledger_carries_watching_status():
+    # A payload built from an actual ledger must name the state as "watching" -
+    # the counterpart to the never_checked state asserted below.
+    from pipeline.build_web import revisions_payload
+    out = revisions_payload(_rev_cfg(), _ledger(1))
+    assert out["status"] == "watching"
+
+
 def test_publish_limit_caps_but_reports_the_total():
     from pipeline.build_web import revisions_payload
     out = revisions_payload(_rev_cfg(limit=2), _ledger(5))
@@ -129,7 +137,13 @@ def test_published_events_are_newest_first():
 def test_no_ledger_yet_publishes_an_honest_empty_payload():
     from pipeline.build_web import revisions_payload
     out = revisions_payload(_rev_cfg(), None)
-    assert out == {"watching_since": None, "last_checked": None, "events": [], "total_events": 0}
+    assert out == {
+        "watching_since": None,
+        "last_checked": None,
+        "events": [],
+        "total_events": 0,
+        "status": "never_checked",
+    }
 
 
 def test_shipped_config_carries_a_publish_limit():
