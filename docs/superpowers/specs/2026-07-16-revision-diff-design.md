@@ -59,12 +59,53 @@ parse bug changes, every affected observation surfaces as a Bank of Canada revis
 would attribute our own commit to the Bank, confidently and in public. This pipeline is young;
 `parse.py` and `transform.sql` *will* change.
 
-A is immune, and the reason is precise: because the **source bytes** are retained and *both sides are
-re-parsed with the current parser*, any change to our own code moves both sides identically and
-cancels. What survives the diff is only what Valet actually said differently.
+A is immune **to parser changes**, and the reason is precise: because the **source bytes** are
+retained and *both sides are re-parsed with the current parser*, any change to our own code moves
+both sides identically and cancels. What survives the diff is only what Valet actually said
+differently.
 
 > A revision is a change in what the **source published** — not a change in what our code computed.
 > Only A measures that.
+
+### 4.1 What re-parsing does *not* cancel — amended 2026-07-16
+
+The paragraph above was the original claim, and **it was too strong**. Found by the final
+whole-branch review, and reproduced live before amending:
+
+Re-parsing cancels changes to how we *read* the bytes. It cannot cancel changes to **which
+observations we asked for**, because that is not parsed — it is *fetched*. `run_ingest` passes
+`start=config.start_date` (`config/settings.yml`), and the retained baseline's bytes were retrieved
+under the **old** window. Move `start_date` forward and every pre-window observation reads as
+`present → absent` for a series present on **both** sides — so the §6 `shared_series` guard, which
+only skips series absent from one side entirely, waves it straight through to `withdrawn`:
+
+```
+start_date 2000-01-01 -> 2015-01-01 (a two-line config edit)
+  => [('CPI_TRIM','2000-01-01','withdrawn',1.0,None),
+      ('CPI_TRIM','2010-01-01','withdrawn',2.0,None)]
+```
+
+At real scale: thousands of fabricated withdrawals, published in public, attributed to the Bank of
+Canada — precisely the failure this architecture was chosen to prevent, arriving through a config
+knob the house rule ("series IDs belong in config, not code") actively encourages touching.
+`?recent=N` is the same hole from the other end.
+
+**Closure — the fetch-params rule.** `run_ingest` writes `_meta.json` beside each vintage recording
+its fetch params (`start_date`, `recent`). `detect_and_record` compares the baseline's to the current
+run's and **skips detection entirely** when they differ, logging loudly to stderr. `last_checked`
+still advances — we *did* reach the source; we simply cannot compare across the boundary — and
+pruning still happens. This is the same philosophy as §6: **skip rather than guess.**
+
+A vintage with **no** `_meta.json` (any vintage predating this rule, including the two seeds) is
+treated as a **mismatch**, not as a match: unknown params are unverifiable, and assuming they match
+is the guess this rule exists to refuse. Detection resumes once two meta-bearing vintages exist.
+
+`observations_from_vintage` excludes `_meta.json` from its glob — it is not a series file.
+
+**Known limitation, stated rather than hidden:** a fetch-param change leaves a **one-run blind spot**.
+Real revisions landing in that window are never detected. `watching_since` is *not* reset — §7 makes
+it write-once — so the ledger's "watching since X" spans a hole. The loud log is the mitigation; the
+honest alternative (resetting `watching_since`) would break §7's invariant and is not taken.
 
 B's attractions (zero new storage, a `FULL OUTER JOIN` in DuckDB that showcases the JD's SQL) do not
 outweigh publishing false attributions. A costs ~3.4 MB steady-state.
@@ -163,7 +204,37 @@ above the honesty line:
 The empty state shows that sentence, **not** "no revisions found". With two days of history, that
 line *is* the feature: it states the limit of what the page can see. All strings live in
 `site/i18n/{en,fr}.json` per the house rule, and numbers use the `fr-CA` formatting fix landing
-alongside in Plan 3.
+alongside in Plan 3b.
+
+### 8.1 The renderer contract — amended 2026-07-16
+
+The final whole-branch review found this section's promise had **no data to render it**. Until an
+online run creates the ledger, `watching_since` is `null` — so there is no X for "watching since X",
+and the only cleanly-rendering field is `total_events: 0`. A naive renderer prints *"no revisions"*,
+which is §11's "empty ledger reads as nothing ever changes" — the exact lie this section exists to
+prevent, relocated from the ledger to the wire format.
+
+The payload therefore **names the state in the data** rather than leaving it inferred from a null:
+
+```json
+{"status": "never_checked" | "watching",
+ "watching_since": str | null, "last_checked": str | null,
+ "events": [...], "total_events": int}
+```
+
+**Binding on the Data-Trust tab (Plan 3b) — three states, never two:**
+
+| `status` | Render |
+|---|---|
+| `never_checked` | *"Revision detection has not run yet."* **MUST NOT** render a count, and **MUST NOT** say "no revisions" — nothing has been looked for yet. |
+| `watching`, `total_events == 0` | *"Watching for revisions since {watching_since} · last checked {last_checked}. None detected."* |
+| `watching`, `total_events > 0` | The table, plus *"showing {len(events)} of {total_events}"* when capped. |
+
+A two-state (null-coalescing) renderer will lie. `null` is honest in the data; it is only honest on
+the page if the page says **why** it is null.
+
+This is the state `site/data/revisions.json` ships in today: `status: "never_checked"`, because only
+`--offline` runs have occurred and the ledger is created by the first **online** run.
 
 ## 9. Error handling & edge cases
 
@@ -204,7 +275,8 @@ false-positive class above, built from data already in the repo.
 
 | Risk | Mitigation |
 |---|---|
-| Our code changes read as BoC revisions | §4 — re-parse both sides with today's parser |
+| Our **parser** changes read as BoC revisions | §4 — re-parse both sides with today's parser |
+| Our **fetch-window** changes read as BoC revisions (`start_date`, `recent`) | §4.1 — `_meta.json` per vintage; skip detection on mismatch or unknown. **This row did not exist until 2026-07-16**: the original table asserted §4 closed the whole class, which was an overclaim, and re-parsing does not cancel a change to *what was fetched*. On a feature whose product is not overclaiming, a spec that overclaimed its own safety was the defect that mattered most. |
 | Config churn reads as withdrawals | §6 — skip series present in only one vintage |
 | Page claims freshness it doesn't have | §9 — `last_checked` only on a run that reached the source |
 | Empty ledger reads as "nothing ever changes" | §8 — `watching_since` stated on the tab, always |
@@ -224,6 +296,20 @@ false-positive class above, built from data already in the repo.
   that cannot attribute our commits to the Bank.
 - **2026-07-16 — `detected_at`, not `revised_on`.** Corrects an overclaim made in the review that
   prompted this feature (*"revised … on 2026-06-20"*). We know when we looked, not when they acted.
+- **2026-07-16 (post-implementation, from the final whole-branch review) — §4 was an overclaim; added
+  §4.1 and the fetch-params rule.** Re-parsing cancels *parser* changes, not changes to *what was
+  fetched*. A `start_date` edit published mass fake withdrawals over the Bank's name; reproduced live
+  before amending. Closed by `_meta.json` per vintage + skip-on-mismatch (and on *unknown* — an
+  absent meta is a mismatch, because assuming equality is the guess the rule refuses). §11 row 1 was
+  rewritten: it had asserted a closure the code did not have.
+- **2026-07-16 (same review) — added §8.1, the renderer contract.** The payload was honest (`null`,
+  not fabrication) but *insufficient*: `total_events: 0` was the only legible field, so a naive tab
+  would say "no revisions" when nothing had been looked for. Now carries an explicit
+  `status: never_checked | watching`; the state is named in the data, not inferred from a null.
+- **2026-07-16 (same review) — `write_ledger` made atomic** (temp file + `os.replace`). `load_ledger`
+  had been hardened across three rounds to fail loudly on every corruption shape, but that treats the
+  symptom; an atomic write means the corrupt file never exists. Hard to justify a non-atomic write on
+  the file §7 calls the permanent product.
 
 ## 13. References
 
