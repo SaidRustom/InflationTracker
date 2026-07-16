@@ -108,10 +108,18 @@ def load_ledger(path: Path, default_watching_since: str) -> Ledger:
         if key not in raw:
             raise RevisionLedgerError(f"revisions ledger at {path} is missing {key!r}")
 
+    if not isinstance(raw["events"], list):
+        raise RevisionLedgerError(f"revisions ledger at {path} has a non-list 'events'")
+
+    try:
+        events = [RevisionEvent(**e) for e in raw["events"]]
+    except (TypeError, KeyError) as exc:
+        raise RevisionLedgerError(f"revisions ledger at {path} has a malformed event: {exc}") from exc
+
     return Ledger(
         watching_since=raw["watching_since"],
         last_checked=raw["last_checked"],
-        events=[RevisionEvent(**e) for e in raw["events"]],
+        events=events,
     )
 
 

@@ -215,3 +215,25 @@ def test_ledger_missing_required_key_raises(tmp_path):
     path.write_text('{"events": []}', encoding="utf-8")
     with pytest.raises(RevisionLedgerError):
         load_ledger(path, default_watching_since="2026-07-14")
+
+
+def test_ledger_with_malformed_event_raises(tmp_path):
+    path = tmp_path / "revisions.json"
+    # Event is missing required 'kind' field
+    path.write_text(
+        '{"watching_since": "2026-07-14", "last_checked": "2026-07-14", "events": [{"series_id": "S"}]}',
+        encoding="utf-8",
+    )
+    with pytest.raises(RevisionLedgerError):
+        load_ledger(path, default_watching_since="2026-07-14")
+
+
+def test_ledger_with_non_list_events_raises(tmp_path):
+    path = tmp_path / "revisions.json"
+    # events is a dict, not a list
+    path.write_text(
+        '{"watching_since": "2026-07-14", "last_checked": "2026-07-14", "events": {}}',
+        encoding="utf-8",
+    )
+    with pytest.raises(RevisionLedgerError):
+        load_ledger(path, default_watching_since="2026-07-14")
