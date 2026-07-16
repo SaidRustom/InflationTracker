@@ -173,6 +173,28 @@ def find_baseline_dir(raw_root: Path, run_date: str) -> Path | None:
     return older[-1] if older else None
 
 
+def detect_and_record(raw_root: Path, run_date: str, ledger_path: Path) -> Ledger:
+    """Diff the retained baseline against this run's vintage and append to the ledger.
+
+    Callers MUST only invoke this on a run that actually reached the source. An
+    offline run or a cache-fallback run never contacted Valet, so advancing
+    last_checked would make the page claim it checked during an outage.
+    """
+    baseline = find_baseline_dir(raw_root, run_date)
+    events: list[RevisionEvent] = []
+    if baseline is not None:
+        events = diff_vintages(
+            observations_from_vintage(baseline),
+            observations_from_vintage(Path(raw_root) / run_date),
+            detected_at=run_date,
+        )
+    ledger = load_ledger(ledger_path, default_watching_since=run_date)
+    ledger = append_events(ledger, events, last_checked=run_date)
+    write_ledger(ledger, ledger_path)
+    prune_vintages(raw_root, keep=2)
+    return ledger
+
+
 def prune_vintages(raw_root: Path, keep: int = 2) -> list[Path]:
     """Keep the newest `keep` vintages. Two, because a run needs baseline AND fetch alive at once.
 

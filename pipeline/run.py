@@ -9,6 +9,7 @@ from pipeline.metrics import run_metrics
 from pipeline.models import load_config
 from pipeline.parse import flatten_observations
 from pipeline.quality import report_to_dict, run_quality, write_report
+from pipeline.revisions import detect_and_record
 from pipeline.transform import build_curated_con, write_curated
 from pipeline.valet_client import ValetClient, ValetError
 
@@ -35,14 +36,24 @@ def main(argv: list[str] | None = None) -> int:
     config = load_config(cfg_dir / "series.yml", cfg_dir / "settings.yml")
     raw_root = Path(args.raw_root)
 
+    reached_source = False
     if not args.offline:
         try:
             run_ingest(config, ValetClient(), raw_root, args.run_date)
+            reached_source = True
         except ValetError as exc:
             if not (raw_root / args.run_date).exists():
                 print(f"ingest failed and no cached raw for {args.run_date}: {exc}", file=sys.stderr)
                 return 2
             print(f"ingest failed; reusing cached raw for {args.run_date}: {exc}", file=sys.stderr)
+
+    # Revision detection compares source bytes, so it runs before anything derived
+    # exists - and only when we actually reached the source. An offline run or a
+    # cache-fallback never contacted Valet; advancing last_checked would let the page
+    # claim "checked today" during an outage.
+    ledger_path = Path(args.curated_dir) / "revisions.json"
+    if reached_source:
+        detect_and_record(raw_root, args.run_date, ledger_path)
 
     rows = _read_raw(raw_root, args.run_date)
     con = build_curated_con(rows, config, ingested_at=args.ingested_at)
