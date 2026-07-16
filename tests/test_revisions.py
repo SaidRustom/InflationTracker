@@ -8,9 +8,11 @@ from pipeline.revisions import (
     RevisionLedgerError,
     append_events,
     diff_vintages,
+    find_baseline_dir,
     ledger_to_dict,
     load_ledger,
     observations_from_vintage,
+    prune_vintages,
     write_ledger,
 )
 
@@ -261,3 +263,35 @@ def test_ledger_path_that_is_directory_raises(tmp_path):
     path.mkdir()
     with pytest.raises(RevisionLedgerError):
         load_ledger(path, default_watching_since="2026-07-14")
+
+
+def _dirs(root, *names):
+    for n in names:
+        (root / n).mkdir(parents=True)
+
+
+def test_baseline_is_the_newest_older_vintage(tmp_path):
+    _dirs(tmp_path, "2026-07-13", "2026-07-14", "2026-07-15")
+    assert find_baseline_dir(tmp_path, "2026-07-15").name == "2026-07-14"
+
+
+def test_no_baseline_on_first_run(tmp_path):
+    _dirs(tmp_path, "2026-07-15")
+    assert find_baseline_dir(tmp_path, "2026-07-15") is None
+
+
+def test_no_baseline_when_raw_root_absent(tmp_path):
+    assert find_baseline_dir(tmp_path / "nope", "2026-07-15") is None
+
+
+def test_prune_keeps_the_two_newest(tmp_path):
+    _dirs(tmp_path, "2026-07-12", "2026-07-13", "2026-07-14", "2026-07-15")
+    removed = prune_vintages(tmp_path, keep=2)
+    assert sorted(p.name for p in removed) == ["2026-07-12", "2026-07-13"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["2026-07-14", "2026-07-15"]
+
+
+def test_prune_is_a_noop_below_the_limit(tmp_path):
+    _dirs(tmp_path, "2026-07-14", "2026-07-15")
+    assert prune_vintages(tmp_path, keep=2) == []
+    assert len(list(tmp_path.iterdir())) == 2

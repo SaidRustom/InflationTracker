@@ -1,4 +1,5 @@
 import json
+import shutil
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
@@ -148,3 +149,30 @@ def write_ledger(ledger: Ledger, path: Path) -> None:
         json.dumps(ledger_to_dict(ledger), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+
+
+def _vintage_dirs(raw_root: Path) -> list[Path]:
+    root = Path(raw_root)
+    if not root.exists():
+        return []
+    return sorted((p for p in root.iterdir() if p.is_dir()), key=lambda p: p.name)
+
+
+def find_baseline_dir(raw_root: Path, run_date: str) -> Path | None:
+    """Newest vintage older than run_date. Names are ISO dates, so they sort chronologically."""
+    older = [p for p in _vintage_dirs(raw_root) if p.name < run_date]
+    return older[-1] if older else None
+
+
+def prune_vintages(raw_root: Path, keep: int = 2) -> list[Path]:
+    """Keep the newest `keep` vintages. Two, because a run needs baseline AND fetch alive at once.
+
+    Callers must only prune on a run that actually reached the source - a run that
+    fetched nothing has no new vintage to make room for, and pruning would discard a
+    baseline in exchange for nothing.
+    """
+    dirs = _vintage_dirs(raw_root)
+    removed = dirs[:-keep] if len(dirs) > keep else []
+    for path in removed:
+        shutil.rmtree(path)
+    return removed
