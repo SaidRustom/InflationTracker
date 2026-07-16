@@ -10,15 +10,21 @@ https://app.notion.com/p/39dcea51fedf81028e24e6f748c1482b
 
 **Status:** Plans **1 and 2 of 3 complete and merged to `main`** (2026-07-15). Plan 1 = pipeline;
 Plan 2 = the bilingual ECharts dashboard (M3) — four panels rendering the transmission chain from
-committed JSON, EN/FR via `?lang=`, **30 tests, ruff clean**. **Next: Plan 3 (M4)** — Data-Trust tab,
-methodology page, revision-diff check, `ci.yml` + `refresh.yml`, README, GitHub Pages deploy.
+committed JSON, EN/FR via `?lang=`, **30 tests, ruff clean**. The **Pages deploy landed early**
+(2026-07-16, ahead of Plan 3 — see *Live* below). **Next: Plan 3 (M4)** — Data-Trust tab,
+methodology page, revision-diff check, `ci.yml` + `refresh.yml`, README.
 **Owner:** said-rustom · Solo · Portfolio piece for a Bank of Canada Developer (Data Operations) application.
 
-**Remote:** `origin` → https://github.com/SaidRustom/InflationTracker (**private**, default branch
-`main`, pushed 2026-07-15). Open question for Plan 2: publishing GitHub Pages from a *private* repo
-requires a paid plan (Pro/Team/Enterprise); on a free account the repo must be public. Confirm the
-account plan before the Pages deploy step — and note the design calls this a *public* dashboard, so
-going public is likely the intended end state regardless.
+**Remote:** `origin` → https://github.com/SaidRustom/InflationTracker (**public** since 2026-07-16,
+default branch `main`).
+
+**Live:** https://saidrustom.github.io/InflationTracker/ — deployed by `.github/workflows/pages.yml`
+on push to `main` touching `site/**`. The repo went public to make Pages free (Pages from a private
+repo needs a paid plan); this closes the open question Plan 2 left, and the design called for a
+public dashboard anyway. Pages source is `build_type: workflow` — it uploads `site/` as an artifact
+rather than serving a branch, because the branch-based source can only serve `/` or `/docs`.
+Everything in `site/` is referenced **relatively** (`./assets/…`, `./data/…`), which is what lets it
+work under the `/InflationTracker/` subpath — keep it that way.
 
 ## What this is
 A free, public web dashboard on the **Bank of Canada Valet API** visualizing the **monetary-policy
