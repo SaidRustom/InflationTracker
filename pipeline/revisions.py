@@ -1,12 +1,14 @@
 import json
 import re
 import shutil
+import sys
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
 from pipeline.parse import flatten_observations
 
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+_META_FILENAME = "_meta.json"
 
 
 def observations_from_vintage(vintage_dir: Path) -> dict[tuple[str, str], float | None]:
@@ -19,11 +21,26 @@ def observations_from_vintage(vintage_dir: Path) -> dict[tuple[str, str], float 
     """
     out: dict[tuple[str, str], float | None] = {}
     for path in sorted(Path(vintage_dir).glob("*.json")):
+        if path.name == _META_FILENAME:
+            # _meta.json records the vintage's fetch params (start_date, recent), not
+            # a series. flatten_observations would harmlessly return [] for it today
+            # (no "observations" key), but skip it explicitly rather than lean on
+            # that - a future field named "observations" in the meta shape would
+            # silently masquerade as real data.
+            continue
         raw = json.loads(path.read_text(encoding="utf-8"))
         for row in flatten_observations(raw):
             value = row["value"]
             out[(row["series_id"], row["obs_date"])] = None if value is None else float(value)
     return out
+
+
+def _read_meta(vintage_dir: Path) -> dict | None:
+    """The fetch params recorded for a vintage, or None if it predates this feature."""
+    path = Path(vintage_dir) / _META_FILENAME
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 _MISSING = object()
@@ -179,15 +196,35 @@ def detect_and_record(raw_root: Path, run_date: str, ledger_path: Path) -> Ledge
     Callers MUST only invoke this on a run that actually reached the source. An
     offline run or a cache-fallback run never contacted Valet, so advancing
     last_checked would make the page claim it checked during an outage.
+
+    Which observations were fetched is a property of the *request* (start_date,
+    ?recent=), not something the parser can recover from bytes. Moving start_date
+    forward makes every pre-window observation vanish on the new side, and the
+    shared_series guard in diff_vintages waves that straight through to `withdrawn`
+    - a config edit publishing fake withdrawals over the Bank's name. So detection
+    only runs when both vintages' recorded fetch params match exactly; unknown
+    (missing _meta.json, e.g. a vintage from before this feature existed) is treated
+    as a mismatch, not as equal, since unverifiable is not the same as unchanged.
     """
     baseline = find_baseline_dir(raw_root, run_date)
     events: list[RevisionEvent] = []
     if baseline is not None:
-        events = diff_vintages(
-            observations_from_vintage(baseline),
-            observations_from_vintage(Path(raw_root) / run_date),
-            detected_at=run_date,
-        )
+        baseline_meta = _read_meta(baseline)
+        current_meta = _read_meta(Path(raw_root) / run_date)
+        if baseline_meta is None or current_meta is None or baseline_meta != current_meta:
+            print(
+                f"revisions: skipping detection between {baseline.name} and {run_date} - "
+                f"fetch params differ or are unknown (baseline={baseline_meta!r}, "
+                f"current={current_meta!r}); we cannot tell a real withdrawal from a "
+                "start_date/recent change, so we are not comparing across this boundary",
+                file=sys.stderr,
+            )
+        else:
+            events = diff_vintages(
+                observations_from_vintage(baseline),
+                observations_from_vintage(Path(raw_root) / run_date),
+                detected_at=run_date,
+            )
     ledger = load_ledger(ledger_path, default_watching_since=run_date)
     ledger = append_events(ledger, events, last_checked=run_date)
     write_ledger(ledger, ledger_path)

@@ -26,3 +26,11 @@ def test_run_ingest_writes_one_file_per_series(tmp_path: Path):
     assert {p.name for p in paths} == {"V39079.json", "CPI_TRIM.json"}
     body = json.loads((tmp_path / "2026-07-13" / "V39079.json").read_text(encoding="utf-8"))
     assert body["observations"][0]["d"] == "2026-07-13"
+
+
+def test_run_ingest_writes_meta_json_with_the_fetch_params(tmp_path: Path):
+    # detect_and_record diffs this file across vintages and skips detection when it
+    # differs - a moved start_date must be visible, not silently unrecorded.
+    run_ingest(_cfg(), FakeClient(), tmp_path, "2026-07-13")
+    meta = json.loads((tmp_path / "2026-07-13" / "_meta.json").read_text(encoding="utf-8"))
+    assert meta == {"start_date": "2000-01-01", "recent": None}

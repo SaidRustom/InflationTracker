@@ -49,6 +49,16 @@ def test_missing_value_becomes_none(tmp_path):
     assert observations_from_vintage(d) == {("S", "2026-01-01"): None}
 
 
+def test_observations_from_vintage_ignores_meta_json(tmp_path):
+    # _meta.json records the vintage's fetch params, not a series - a vintage that
+    # has one must still yield only its real series observations.
+    d = _vintage(tmp_path, "2026-07-15", "S", [("2026-01-01", "1.0")])
+    (d / "_meta.json").write_text(
+        json.dumps({"start_date": "2000-01-01", "recent": None}), encoding="utf-8"
+    )
+    assert observations_from_vintage(d) == {("S", "2026-01-01"): 1.0}
+
+
 def test_reads_every_series_file_in_the_vintage(tmp_path):
     d = _vintage(tmp_path, "v", "A", [("2026-01-01", "1.0")])
     _vintage(tmp_path, "v", "B", [("2026-01-01", "2.0")])

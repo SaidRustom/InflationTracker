@@ -17,7 +17,17 @@ _SERIES = [
 ]
 
 
-def _vintage(root: Path, name: str, series_id: str, observations: list[tuple[str, str | None]]) -> Path:
+def _vintage(
+    root: Path,
+    name: str,
+    series_id: str,
+    observations: list[tuple[str, str | None]],
+    meta: dict | None = None,
+    write_meta: bool = True,
+) -> Path:
+    """Write one raw vintage. Writes a matching _meta.json by default so these
+    fixtures behave like two runs of an unchanged config - the meta-mismatch skip
+    added for the start_date footgun has its own dedicated tests below."""
     d = root / name
     d.mkdir(parents=True, exist_ok=True)
     body = {
@@ -28,6 +38,9 @@ def _vintage(root: Path, name: str, series_id: str, observations: list[tuple[str
         ],
     }
     (d / f"{series_id}.json").write_text(json.dumps(body), encoding="utf-8")
+    if write_meta:
+        actual_meta = meta if meta is not None else {"start_date": "2000-01-01", "recent": None}
+        (d / "_meta.json").write_text(json.dumps(actual_meta), encoding="utf-8")
     return d
 
 
@@ -70,6 +83,45 @@ def test_rerunning_the_same_run_date_does_not_duplicate(tmp_path):
     detect_and_record(raw, "2026-07-15", path)
     ledger = detect_and_record(raw, "2026-07-15", path)
     assert len(ledger.events) == 1
+
+
+def test_detect_and_record_detects_normally_when_meta_matches(tmp_path):
+    """Positive control: both vintages carry the same recorded fetch params. Without
+    this passing, the two skip tests below could pass vacuously by detection simply
+    never firing at all."""
+    raw = tmp_path / "raw"
+    _vintage(raw, "2026-07-14", "S", [("2026-03-01", "2.9")])
+    _vintage(raw, "2026-07-15", "S", [("2026-03-01", "3.1")])
+    ledger = detect_and_record(raw, "2026-07-15", tmp_path / "revisions.json")
+    assert [(e.kind, e.old, e.new) for e in ledger.events] == [("revised", 2.9, 3.1)]
+    assert ledger.last_checked == "2026-07-15"
+
+
+def test_detect_and_record_skips_when_fetch_window_changed(tmp_path):
+    # A start_date moved forward makes every pre-window observation vanish on the
+    # new side; without this skip the shared_series guard would wave that through
+    # to `withdrawn` - a config edit publishing fake withdrawals.
+    raw = tmp_path / "raw"
+    _vintage(raw, "2026-07-14", "S", [("2026-03-01", "2.9")],
+             meta={"start_date": "2000-01-01", "recent": None})
+    _vintage(raw, "2026-07-15", "S", [("2026-03-01", "3.1")],
+             meta={"start_date": "2010-01-01", "recent": None})
+    ledger = detect_and_record(raw, "2026-07-15", tmp_path / "revisions.json")
+    assert ledger.events == []
+    # We DID reach the source this run - only the cross-boundary comparison is unsafe.
+    assert ledger.last_checked == "2026-07-15"
+
+
+def test_detect_and_record_skips_when_baseline_has_no_meta(tmp_path):
+    # The real case on the next run: the two committed vintages predate this
+    # feature and have no _meta.json. Unknown params are not the same as equal
+    # params, so this must skip rather than assume nothing changed.
+    raw = tmp_path / "raw"
+    _vintage(raw, "2026-07-14", "S", [("2026-03-01", "2.9")], write_meta=False)
+    _vintage(raw, "2026-07-15", "S", [("2026-03-01", "3.1")])
+    ledger = detect_and_record(raw, "2026-07-15", tmp_path / "revisions.json")
+    assert ledger.events == []
+    assert ledger.last_checked == "2026-07-15"
 
 
 # --- Tests below drive pipeline.run.main() end-to-end, to pin the reached_source gate
