@@ -30,6 +30,33 @@ def _write(out_dir: Path, name: str, payload: dict) -> Path:
     return path
 
 
+def revisions_payload(config: AppConfig, revisions: dict | None) -> dict:
+    """Cap the published event list, enrich with EN/FR labels, always state the total.
+
+    The ledger stays label-free and complete; this is the view. total_events is what
+    lets the page say "showing 100 of 342" instead of silently truncating.
+    """
+    if revisions is None:
+        return {"watching_since": None, "last_checked": None, "events": [], "total_events": 0}
+
+    labels = {s.id: (s.label_en, s.label_fr) for s in config.series}
+    events = revisions.get("events", [])
+    limit = config.revisions.publish_limit
+    recent = list(reversed(events[-limit:]))  # newest first
+
+    enriched = []
+    for e in recent:
+        label_en, label_fr = labels.get(e["series_id"], (e["series_id"], e["series_id"]))
+        enriched.append({**e, "label_en": label_en, "label_fr": label_fr})
+
+    return {
+        "watching_since": revisions.get("watching_since"),
+        "last_checked": revisions.get("last_checked"),
+        "events": enriched,
+        "total_events": len(events),
+    }
+
+
 def build_web(
     con: duckdb.DuckDBPyConnection,
     config: AppConfig,
@@ -37,6 +64,7 @@ def build_web(
     quality: dict,
     out_dir: Path,
     as_of: str,
+    revisions: dict | None = None,
 ) -> list[Path]:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -65,10 +93,12 @@ def build_web(
         "band_months": metrics["band_months"],
     }))
     paths.append(_write(out_dir, "data_quality.json", quality))
+    paths.append(_write(out_dir, "revisions.json", revisions_payload(config, revisions)))
     paths.append(_write(out_dir, "manifest.json", {
         "as_of": as_of,
         "last_refreshed": quality.get("generated_at", f"{as_of}T00:00:00"),
         "overall_quality": quality.get("overall", "OK"),
         "panels": ["policy", "markets", "households", "target"],
+        "revisions": "revisions.json",
     }))
     return paths

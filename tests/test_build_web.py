@@ -2,7 +2,7 @@ import json
 
 from pipeline.build_web import build_web, series_points
 from pipeline.metrics import run_metrics
-from pipeline.models import AppConfig, SeriesConfig, Thresholds
+from pipeline.models import AppConfig, RevisionsConfig, SeriesConfig, Thresholds
 from pipeline.quality import report_to_dict, run_quality
 from pipeline.transform import build_curated_con
 
@@ -78,3 +78,61 @@ def test_panel_target_separates_headline_from_core(tmp_path):
     assert target["band_months"]["latest_value"] == 3.2
     assert target["band_months"]["latest_inside"] is False
     assert target["band_months"]["months_inside"] == 0
+
+
+def _rev_cfg(limit=100) -> AppConfig:
+    return AppConfig(
+        start_date="2000-01-01",
+        series=[SeriesConfig(id="S", label_en="Series S", label_fr="Serie S", frequency="monthly", role="inflation")],
+        thresholds=Thresholds(staleness_days={"monthly": 95}, max_null_ratio=0.2, value_ranges={"inflation": (-5.0, 25.0)}),
+        revisions=RevisionsConfig(publish_limit=limit),
+    )
+
+
+def _ledger(n: int) -> dict:
+    return {
+        "watching_since": "2026-07-14",
+        "last_checked": "2026-07-16",
+        "events": [
+            {"series_id": "S", "date": f"2026-{m:02d}-01", "kind": "revised",
+             "old": 2.9, "new": 3.1, "detected_at": "2026-07-16"}
+            for m in range(1, n + 1)
+        ],
+    }
+
+
+def test_revisions_payload_is_enriched_with_labels():
+    from pipeline.build_web import revisions_payload
+    out = revisions_payload(_rev_cfg(), _ledger(1))
+    assert out["events"][0]["label_en"] == "Series S"
+    assert out["events"][0]["label_fr"] == "Serie S"
+    assert out["watching_since"] == "2026-07-14"
+    assert out["last_checked"] == "2026-07-16"
+
+
+def test_publish_limit_caps_but_reports_the_total():
+    from pipeline.build_web import revisions_payload
+    out = revisions_payload(_rev_cfg(limit=2), _ledger(5))
+    assert len(out["events"]) == 2
+    assert out["total_events"] == 5  # no silent truncation
+
+
+def test_published_events_are_newest_first():
+    from pipeline.build_web import revisions_payload
+    out = revisions_payload(_rev_cfg(limit=2), _ledger(5))
+    assert [e["date"] for e in out["events"]] == ["2026-05-01", "2026-04-01"]
+
+
+def test_no_ledger_yet_publishes_an_honest_empty_payload():
+    from pipeline.build_web import revisions_payload
+    out = revisions_payload(_rev_cfg(), None)
+    assert out == {"watching_since": None, "last_checked": None, "events": [], "total_events": 0}
+
+
+def test_shipped_config_carries_a_publish_limit():
+    from pathlib import Path
+
+    from pipeline.models import load_config
+    cfg_dir = Path(__file__).resolve().parents[1] / "config"
+    cfg = load_config(cfg_dir / "series.yml", cfg_dir / "settings.yml")
+    assert cfg.revisions.publish_limit > 0

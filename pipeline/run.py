@@ -9,7 +9,7 @@ from pipeline.metrics import run_metrics
 from pipeline.models import load_config
 from pipeline.parse import flatten_observations
 from pipeline.quality import report_to_dict, run_quality, write_report
-from pipeline.revisions import detect_and_record
+from pipeline.revisions import detect_and_record, ledger_to_dict, load_ledger
 from pipeline.transform import build_curated_con, write_curated
 from pipeline.valet_client import ValetClient, ValetError
 
@@ -55,6 +55,12 @@ def main(argv: list[str] | None = None) -> int:
     if reached_source:
         detect_and_record(raw_root, args.run_date, ledger_path)
 
+    revisions = (
+        ledger_to_dict(load_ledger(ledger_path, default_watching_since=args.run_date))
+        if ledger_path.exists()
+        else None
+    )
+
     rows = _read_raw(raw_root, args.run_date)
     con = build_curated_con(rows, config, ingested_at=args.ingested_at)
     write_curated(con, Path(args.curated_dir))
@@ -62,7 +68,10 @@ def main(argv: list[str] | None = None) -> int:
     metrics = run_metrics(con, config)
     report = run_quality(con, config, as_of=args.run_date)
     write_report(report, Path(args.curated_dir) / "data_quality.json")
-    build_web(con, config, metrics, report_to_dict(report), Path(args.web_dir), as_of=args.run_date)
+    build_web(
+        con, config, metrics, report_to_dict(report), Path(args.web_dir),
+        as_of=args.run_date, revisions=revisions,
+    )
 
     print(f"pipeline OK - overall quality: {report.overall}")
     return 1 if report.overall == "FAIL" else 0

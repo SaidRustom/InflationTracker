@@ -13,3 +13,9 @@ thresholds:
     lending:   [0.0, 30.0]
     inflation: [-5.0, 25.0]
     headline:  [-5.0, 25.0]
+
+revisions:
+  # How many of the most recent ledger events site/data/revisions.json carries. The
+  # ledger keeps every event forever; the page states "showing N of TOTAL" so the cap
+  # is never a silent truncation.
+  publish_limit: 100

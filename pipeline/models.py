@@ -26,11 +26,16 @@ class InflationBand(BaseModel):
     high: float
 
 
+class RevisionsConfig(BaseModel):
+    publish_limit: int = 100
+
+
 class AppConfig(BaseModel):
     start_date: str
     series: list[SeriesConfig]
     thresholds: Thresholds
     inflation_band: InflationBand = InflationBand(low=1.0, high=3.0)
+    revisions: RevisionsConfig = RevisionsConfig()
 
     def by_metric_key(self, key: str) -> SeriesConfig:
         for s in self.series:
@@ -47,4 +52,5 @@ def load_config(series_path: Path, settings_path: Path) -> AppConfig:
         series=[SeriesConfig(**s) for s in series],
         thresholds=Thresholds(**settings["thresholds"]),
         inflation_band=InflationBand(**settings["inflation_band"]),
+        revisions=RevisionsConfig(**settings.get("revisions", {})),
     )
