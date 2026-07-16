@@ -1,7 +1,18 @@
 import json
+import pytest
 from pathlib import Path
 
-from pipeline.revisions import RevisionEvent, diff_vintages, observations_from_vintage
+from pipeline.revisions import (
+    Ledger,
+    RevisionEvent,
+    RevisionLedgerError,
+    append_events,
+    diff_vintages,
+    ledger_to_dict,
+    load_ledger,
+    observations_from_vintage,
+    write_ledger,
+)
 
 
 def _vintage(tmp_path: Path, name: str, series_id: str, observations: list[tuple[str, str | None]]) -> Path:
@@ -134,3 +145,73 @@ def test_events_are_ordered_by_series_then_date():
     assert [(e.series_id, e.date) for e in events] == [
         ("A", "2026-01-01"), ("A", "2026-03-01"), ("B", "2026-02-01"),
     ]
+
+
+def _event(detected_at="2026-06-20", old=2.9, new=3.1) -> RevisionEvent:
+    return RevisionEvent("S", "2026-03-01", "revised", old, new, detected_at)
+
+
+def test_first_run_creates_ledger_with_watching_since(tmp_path):
+    ledger: Ledger = load_ledger(tmp_path / "revisions.json", default_watching_since="2026-07-14")
+    assert ledger.watching_since == "2026-07-14"
+    assert ledger.events == []
+
+
+def test_watching_since_never_mutates(tmp_path):
+    path = tmp_path / "revisions.json"
+    write_ledger(load_ledger(path, default_watching_since="2026-07-14"), path)
+    # A later run passes a different default; the stored value must win.
+    ledger = load_ledger(path, default_watching_since="2026-09-01")
+    ledger = append_events(ledger, [_event()], last_checked="2026-09-01")
+    assert ledger.watching_since == "2026-07-14"
+
+
+def test_append_is_idempotent_for_the_same_run(tmp_path):
+    ledger = load_ledger(tmp_path / "l.json", default_watching_since="2026-07-14")
+    ledger = append_events(ledger, [_event()], last_checked="2026-06-20")
+    ledger = append_events(ledger, [_event()], last_checked="2026-06-20")
+    assert len(ledger.events) == 1
+
+
+def test_same_observation_revised_again_later_is_a_new_row(tmp_path):
+    ledger = load_ledger(tmp_path / "l.json", default_watching_since="2026-07-14")
+    ledger = append_events(ledger, [_event(detected_at="2026-06-20")], last_checked="2026-06-20")
+    ledger = append_events(
+        ledger,
+        [_event(detected_at="2026-07-20", old=3.1, new=3.0)],
+        last_checked="2026-07-20",
+    )
+    assert len(ledger.events) == 2
+
+
+def test_last_checked_advances(tmp_path):
+    ledger = load_ledger(tmp_path / "l.json", default_watching_since="2026-07-14")
+    ledger = append_events(ledger, [], last_checked="2026-07-16")
+    assert ledger.last_checked == "2026-07-16"
+
+
+def test_ledger_roundtrips(tmp_path):
+    path = tmp_path / "revisions.json"
+    ledger = append_events(
+        load_ledger(path, default_watching_since="2026-07-14"),
+        [_event()],
+        last_checked="2026-06-20",
+    )
+    write_ledger(ledger, path)
+    reloaded = load_ledger(path, default_watching_since="ignored")
+    assert reloaded == ledger
+    assert ledger_to_dict(ledger)["events"][0]["kind"] == "revised"
+
+
+def test_corrupt_ledger_raises_and_does_not_reset(tmp_path):
+    path = tmp_path / "revisions.json"
+    path.write_text("{not json", encoding="utf-8")
+    with pytest.raises(RevisionLedgerError):
+        load_ledger(path, default_watching_since="2026-07-14")
+
+
+def test_ledger_missing_required_key_raises(tmp_path):
+    path = tmp_path / "revisions.json"
+    path.write_text('{"events": []}', encoding="utf-8")
+    with pytest.raises(RevisionLedgerError):
+        load_ledger(path, default_watching_since="2026-07-14")
