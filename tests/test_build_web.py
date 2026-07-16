@@ -1,5 +1,8 @@
 import json
 
+import pytest
+from pydantic import ValidationError
+
 from pipeline.build_web import build_web, series_points
 from pipeline.metrics import run_metrics
 from pipeline.models import AppConfig, RevisionsConfig, SeriesConfig, Thresholds
@@ -136,3 +139,26 @@ def test_shipped_config_carries_a_publish_limit():
     cfg_dir = Path(__file__).resolve().parents[1] / "config"
     cfg = load_config(cfg_dir / "series.yml", cfg_dir / "settings.yml")
     assert cfg.revisions.publish_limit > 0
+
+
+@pytest.mark.parametrize("limit", [0, -1])
+def test_publish_limit_below_one_is_rejected(limit):
+    # events[-limit:] with limit=0 is events[0:] - the ENTIRE ledger, not none of it.
+    # publish_limit must be >= 1 so that footgun can never reach the slice.
+    with pytest.raises(ValidationError):
+        RevisionsConfig(publish_limit=limit)
+
+
+def test_revisions_payload_falls_back_to_raw_id_for_series_removed_from_config():
+    from pipeline.build_web import revisions_payload
+    # The ledger is permanent; a series can be dropped from config after events
+    # about it were recorded. label lookup must degrade to the raw id, not raise.
+    ledger = {
+        "watching_since": "2026-07-14",
+        "last_checked": "2026-07-16",
+        "events": [{"series_id": "GONE", "date": "2026-01-01", "kind": "revised",
+                    "old": 2.9, "new": 3.1, "detected_at": "2026-07-16"}],
+    }
+    out = revisions_payload(_rev_cfg(), ledger)
+    assert out["events"][0]["label_en"] == "GONE"
+    assert out["events"][0]["label_fr"] == "GONE"

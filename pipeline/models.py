@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SeriesConfig(BaseModel):
@@ -27,7 +27,10 @@ class InflationBand(BaseModel):
 
 
 class RevisionsConfig(BaseModel):
-    publish_limit: int = 100
+    # publish_limit must be >= 1: `events[-limit:]` with limit=0 is events[0:],
+    # i.e. the ENTIRE ledger, so a 0 would silently publish everything instead of
+    # nothing. Reject it at load rather than let it become a silent uncapped feed.
+    publish_limit: int = Field(default=100, ge=1)
 
 
 class AppConfig(BaseModel):
