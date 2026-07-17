@@ -77,6 +77,9 @@ export function asOfTooltipFormatter(series, asOfLabel, lang) {
 
 export function baseOption({ yAxisName = "%" } = {}) {
   return {
+    // SC 2.3.3 is AAA and not part of this plan's claim, but suppressing the
+    // load animation for readers who asked for less motion is nearly free.
+    animation: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     color: PALETTE,
     grid: { left: 52, right: 18, top: 28, bottom: 56 },
     tooltip: { trigger: "axis", axisPointer: { type: "line" } },

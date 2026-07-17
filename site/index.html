@@ -9,6 +9,7 @@
   <script src="./assets/vendor/echarts-6.1.0.min.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#panels" data-i18n="app.skipToContent">Skip to content</a>
   <header class="site-header">
     <div class="header-text">
       <h1 data-i18n="app.title">Monetary-Policy Transmission &amp; Inflation Tracker</h1>
@@ -25,9 +26,11 @@
     <strong id="overall-quality" class="quality">—</strong>
   </p>
 
-  <p id="load-error" class="load-error" hidden data-i18n="app.error">Could not load data. The page shows the last published snapshot.</p>
+  <div aria-live="polite">
+    <p id="load-error" class="load-error" hidden data-i18n="app.error">Could not load data. The page shows the last published snapshot.</p>
+  </div>
 
-  <main id="panels"></main>
+  <main id="panels" tabindex="-1"></main>
 
   <footer class="site-footer">
     <p class="disclaimer" data-i18n="app.disclaimer">For information only. This page describes published data. It is not financial advice, and it does not forecast interest rates or inflation.</p>

@@ -2,6 +2,7 @@
   "app.title": "Transmission de la politique monétaire et suivi de l'inflation",
   "app.subtitle": "Comment le taux directeur de la Banque du Canada se transmet aux marchés, aux ménages et aux prix.",
   "app.langSwitch": "English",
+  "app.skipToContent": "Passer au contenu",
   "app.lastRefreshed": "Dernière mise à jour",
   "app.dataQuality": "Qualité des données",
   "app.loading": "Chargement…",

@@ -2,6 +2,7 @@
   "app.title": "Monetary-Policy Transmission & Inflation Tracker",
   "app.subtitle": "How the Bank of Canada's policy rate travels through markets to households and prices.",
   "app.langSwitch": "Français",
+  "app.skipToContent": "Skip to content",
   "app.lastRefreshed": "Last refreshed",
   "app.dataQuality": "Data quality",
   "app.loading": "Loading…",

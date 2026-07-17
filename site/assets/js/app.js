@@ -28,7 +28,10 @@ async function boot() {
 
   try {
     const manifest = await loadJSON("manifest.json");
-    document.getElementById("last-refreshed").textContent = manifest.last_refreshed;
+    const refreshed = new Date(manifest.last_refreshed);
+    document.getElementById("last-refreshed").textContent = Number.isNaN(refreshed.getTime())
+      ? manifest.last_refreshed
+      : new Intl.DateTimeFormat(lang === "fr" ? "fr-CA" : "en-CA", { dateStyle: "long" }).format(refreshed);
     const quality = document.getElementById("overall-quality");
     quality.textContent = manifest.overall_quality;
     quality.dataset.status = manifest.overall_quality;

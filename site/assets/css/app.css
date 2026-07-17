@@ -114,3 +114,27 @@ body {
 .chart-data-link {
   margin: 0.25rem 0 0;
 }
+
+/* SC 2.4.7: the file had zero focus styles. The charts are newly focusable
+   (tabindex="0"), so without this a keyboard user tabs into an invisible stop. */
+:focus-visible {
+  outline: 3px solid #1a5fb4;
+  outline-offset: 2px;
+}
+#panels:focus {
+  outline: none; /* skip-link target: focus is programmatic, not a visible stop */
+}
+
+/* SC 2.4.1 */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: #fff;
+  color: #1a5fb4;
+  padding: 0.6rem 1rem;
+  z-index: 10;
+}
+.skip-link:focus {
+  left: 0;
+}
