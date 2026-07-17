@@ -1,4 +1,4 @@
-import { num } from "./format.js";
+import { count, num } from "./format.js";
 import { t } from "./i18n.js";
 
 // ECharts 6.1.0's default palette, pinned rather than inherited. The tooltip
@@ -145,7 +145,79 @@ export function chartAria(series, dict, lang) {
   return t(dict, "chart.aria", { series: names, start, end, latest });
 }
 
-export function mountChart(el, option, { dict, lang } = {}) {
+// 12 rows x ~2-4 series x 4 panels is ~150 rows page-wide. Full tables would be
+// ~25,000 cells - fidelity that serves nobody, and slower for everyone.
+const RECENT_ROWS = 12;
+
+// One table PER SERIES, not one per panel. A panel-wide table breaks on panel 3
+// for the same reason the tooltip did: the mortgage is monthly (161 points), the
+// 5-year yield daily (6,384), and only 90 dates coincide - so the 12 most recent
+// dates are all daily and the mortgage column would be entirely empty.
+function seriesTable(s, dict, lang) {
+  const table = document.createElement("table");
+
+  const caption = document.createElement("caption");
+  caption.textContent = t(dict, "chart.table.caption", {
+    series: s.name,
+    shown: count(Math.min(RECENT_ROWS, s.data.length), lang),
+    total: count(s.data.length, lang),
+  });
+  table.appendChild(caption);
+
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  for (const key of ["chart.table.date", "chart.table.value"]) {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = t(dict, key);
+    headRow.appendChild(th);
+  }
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  for (const [date, value] of s.data.slice(-RECENT_ROWS).reverse()) {
+    const row = document.createElement("tr");
+    const dateCell = document.createElement("th");
+    dateCell.scope = "row";
+    dateCell.textContent = date; // ISO: correct in BOTH en-CA and fr-CA
+    const valueCell = document.createElement("td");
+    // A null is a holiday/gap. Say so with an em dash rather than leaving a
+    // blank cell, which reads as an oversight.
+    valueCell.textContent = value == null ? "—" : num(value, lang);
+    row.append(dateCell, valueCell);
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+  return table;
+}
+
+// Built with DOM APIs, not innerHTML: every cell goes through textContent, so
+// there is no escaping question to get wrong on a new surface.
+export function dataDetails(series, dict, lang, jsonName) {
+  const details = document.createElement("details");
+  details.className = "chart-data";
+
+  const summary = document.createElement("summary");
+  summary.textContent = t(dict, "chart.table.summary");
+  details.appendChild(summary);
+
+  for (const s of series) {
+    if (s.data.length) details.appendChild(seriesTable(s, dict, lang));
+  }
+
+  const link = document.createElement("a");
+  link.href = `./data/${jsonName}`;
+  link.textContent = t(dict, "chart.table.fullData");
+  const p = document.createElement("p");
+  p.className = "chart-data-link";
+  p.appendChild(link);
+  details.appendChild(p);
+
+  return details;
+}
+
+export function mountChart(el, option, { dict, lang, jsonName } = {}) {
   // Declared outside the `if` because Tasks 3 and 4 also consume it.
   const palette = option.color || PALETTE;
   const series = option.series.map((s, i) => ({
@@ -166,6 +238,11 @@ export function mountChart(el, option, { dict, lang } = {}) {
 
   const chart = echarts.init(el);
   chart.setOption(option);
+
+  if (dict && jsonName) {
+    el.insertAdjacentElement("afterend", dataDetails(series, dict, lang, jsonName));
+  }
+
   window.addEventListener("resize", () => chart.resize());
   return chart;
 }

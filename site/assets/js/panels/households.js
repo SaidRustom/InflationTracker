@@ -37,5 +37,5 @@ export async function renderHouseholds(root, dict, lang) {
     },
   ];
 
-  mountChart(section.querySelector("#chart-households"), option, { dict, lang });
+  mountChart(section.querySelector("#chart-households"), option, { dict, lang, jsonName: "panel_households.json" });
 }

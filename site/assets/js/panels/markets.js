@@ -38,5 +38,5 @@ export async function renderMarkets(root, dict, lang) {
     ...data.yields.map((block) => lineSeries(block, lang)),
   ];
 
-  mountChart(section.querySelector("#chart-markets"), option, { dict, lang });
+  mountChart(section.querySelector("#chart-markets"), option, { dict, lang, jsonName: "panel_markets.json" });
 }

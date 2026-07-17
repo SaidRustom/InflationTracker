@@ -19,5 +19,5 @@ export async function renderPolicy(root, dict, lang) {
     lineSeries(block, lang, block.role === "policy" ? { step: "end", lineStyle: { width: 2.5 } } : {})
   );
 
-  mountChart(section.querySelector("#chart-policy"), option, { dict, lang });
+  mountChart(section.querySelector("#chart-policy"), option, { dict, lang, jsonName: "panel_policy.json" });
 }
