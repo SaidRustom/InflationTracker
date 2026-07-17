@@ -53,9 +53,16 @@ Series IDs belong in **config**, not code. A series can disappear — treat stal
 - `docs/superpowers/specs/2026-07-14-inflation-tracker-design.md` — approved design record (see its
   decisions log for the 2026-07-15 amendments: `?lang=` i18n, headline CPI, plan split, staleness fix).
 - `docs/superpowers/specs/2026-07-16-revision-diff-design.md` — approved design for the **revision-diff**,
-  Plan 3's headline feature. Amends §9/§12. Key rule: revisions are detected by diffing **retained raw
-  vintages re-parsed with today's parser** — never the curated parquet or published JSON, because those
-  compare old code's output to new code's output and would attribute our own commits to the Bank.
+  Plan 3a's headline feature (**built and merged**). Amends §9/§12. Key rule: revisions are detected by
+  diffing **retained raw vintages re-parsed with today's parser** — never the curated parquet or published
+  JSON, because those compare old code's output to new code's output and would attribute our own commits
+  to the Bank. See its **§4.1**: re-parsing does *not* cancel a change to the **fetch window**
+  (`start_date`, `recent`) — that is closed separately by `_meta.json` per vintage + skip-on-mismatch.
+- `docs/superpowers/specs/2026-07-17-plan-3b-design.md` — approved design for **Plan 3b**: accessibility
+  remediation + `fr-CA` formatting. Key rules: the chart `aria-label` is composed from **published values
+  only** (a derived claim there could contradict the visual readouts); **dates are already correct in both
+  languages** (en-CA and fr-CA both render ISO); ECharts' built-in `aria` is **rejected on measured
+  evidence**; and we claim only the five tested success criteria, never blanket "WCAG 2.1 AA".
 - `docs/superpowers/plans/2026-07-14-inflation-tracker-pipeline.md` — Plan 1 of 3 (pipeline). Done.
 - `docs/superpowers/plans/2026-07-15-inflation-tracker-dashboard.md` — Plan 2 of 3 (M3 dashboard). Done.
   Its "Deferred to Plan 3" section is the input to the next plan.
