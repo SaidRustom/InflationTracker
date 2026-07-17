@@ -81,7 +81,13 @@ export function baseOption({ yAxisName = "%" } = {}) {
     // load animation for readers who asked for less motion is nearly free.
     animation: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     color: PALETTE,
-    grid: { left: 52, right: 18, top: 28, bottom: 56 },
+    // top: 28 assumed the legend and the y-axis name could share one row - true
+    // at desktop width, where the scroll legend centres away from the axis name,
+    // but at narrow widths (375px) both anchor near the left edge and collide.
+    // The legend sits at its own top: 0 regardless of grid; giving the grid (and
+    // so the name, which floats just above it) a full row's clearance below that
+    // fixes every panel, since all four inherit this one baseOption().
+    grid: { left: 52, right: 18, top: 46, bottom: 56 },
     tooltip: { trigger: "axis", axisPointer: { type: "line" } },
     legend: { type: "scroll", top: 0, icon: "roundRect" },
     xAxis: { type: "time", axisLine: { lineStyle: { color: "#9aa0a6" } } },
