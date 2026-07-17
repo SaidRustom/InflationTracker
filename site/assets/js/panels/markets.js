@@ -1,6 +1,7 @@
 import { loadJSON } from "../data.js";
 import { t } from "../i18n.js";
 import { baseOption, lineSeries, mountChart } from "../charts.js";
+import { signed } from "../format.js";
 
 export async function renderMarkets(root, dict, lang) {
   const data = await loadJSON("panel_markets.json");
@@ -9,7 +10,7 @@ export async function renderMarkets(root, dict, lang) {
   const inverted = Boolean(latest && latest.inverted);
   const shapeKey = inverted ? "panel.markets.inverted" : "panel.markets.normal";
   const shapeClass = inverted ? "flag-inverted" : "flag-normal";
-  const slopeText = latest ? `${latest.slope > 0 ? "+" : ""}${latest.slope.toFixed(2)}` : "—";
+  const slopeText = latest ? signed(latest.slope, lang) : "—";
 
   const section = document.createElement("section");
   section.className = "panel";
@@ -37,7 +38,5 @@ export async function renderMarkets(root, dict, lang) {
     ...data.yields.map((block) => lineSeries(block, lang)),
   ];
 
-  mountChart(section.querySelector("#chart-markets"), option, {
-    asOfLabel: t(dict, "tooltip.asOf"),
-  });
+  mountChart(section.querySelector("#chart-markets"), option, { dict, lang });
 }

@@ -1,11 +1,12 @@
 import { loadJSON } from "../data.js";
 import { t } from "../i18n.js";
 import { baseOption, lineSeries, mountChart } from "../charts.js";
+import { signed } from "../format.js";
 
 export async function renderHouseholds(root, dict, lang) {
   const data = await loadJSON("panel_households.json");
   const latest = data.spread.length ? data.spread[data.spread.length - 1] : null;
-  const spreadText = latest ? `${latest.spread.toFixed(2)}` : "—";
+  const spreadText = latest ? signed(latest.spread, lang) : "—";
 
   const section = document.createElement("section");
   section.className = "panel";
@@ -36,7 +37,5 @@ export async function renderHouseholds(root, dict, lang) {
     },
   ];
 
-  mountChart(section.querySelector("#chart-households"), option, {
-    asOfLabel: t(dict, "tooltip.asOf"),
-  });
+  mountChart(section.querySelector("#chart-households"), option, { dict, lang });
 }

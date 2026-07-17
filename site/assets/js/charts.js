@@ -1,3 +1,6 @@
+import { num } from "./format.js";
+import { t } from "./i18n.js";
+
 // ECharts 6.1.0's default palette, pinned rather than inherited. The tooltip
 // draws its own swatches and needs each series' colour up front; leaving it
 // implicit would also let an ECharts upgrade silently repaint every panel.
@@ -52,7 +55,7 @@ function hoveredIso(hovered) {
 // from, so a May mortgage rate read on a June hover is never passed off as a
 // June observation. This mirrors the pipeline's own ASOF-join semantics and the
 // step:'end' treatment the policy rate already gets in policy.js.
-export function asOfTooltipFormatter(series, asOfLabel) {
+export function asOfTooltipFormatter(series, asOfLabel, lang) {
   return (params) => {
     const hovered = Array.isArray(params) ? params[0] : params;
     if (!hovered) return "";
@@ -65,7 +68,7 @@ export function asOfTooltipFormatter(series, asOfLabel) {
           `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;` +
           `background:${s.color};margin-right:6px"></span>`;
         const carried = pt[0] !== iso ? ` <span style="opacity:.55">(${asOfLabel} ${pt[0]})</span>` : "";
-        return `<div style="white-space:nowrap">${swatch}${s.name}: <b>${pt[1].toFixed(2)}</b>${carried}</div>`;
+        return `<div style="white-space:nowrap">${swatch}${s.name}: <b>${num(pt[1], lang)}</b>${carried}</div>`;
       })
       .filter(Boolean);
     return `<div style="font-weight:600;margin-bottom:4px">${iso}</div>${rows.join("")}`;
@@ -108,16 +111,22 @@ export function lineSeries(block, lang, opts = {}) {
   };
 }
 
-export function mountChart(el, option, { asOfLabel } = {}) {
-  if (asOfLabel) {
-    const palette = option.color || PALETTE;
-    const series = option.series.map((s, i) => ({
-      name: s.name,
-      data: s.data,
-      color: palette[i % palette.length],
-    }));
-    option.tooltip = { ...option.tooltip, formatter: asOfTooltipFormatter(series, asOfLabel) };
+export function mountChart(el, option, { dict, lang } = {}) {
+  // Declared outside the `if` because Tasks 3 and 4 also consume it.
+  const palette = option.color || PALETTE;
+  const series = option.series.map((s, i) => ({
+    name: s.name,
+    data: s.data,
+    color: palette[i % palette.length],
+  }));
+
+  if (dict) {
+    option.tooltip = {
+      ...option.tooltip,
+      formatter: asOfTooltipFormatter(series, t(dict, "tooltip.asOf"), lang),
+    };
   }
+
   const chart = echarts.init(el);
   chart.setOption(option);
   window.addEventListener("resize", () => chart.resize());

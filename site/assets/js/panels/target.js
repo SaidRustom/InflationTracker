@@ -1,6 +1,7 @@
 import { loadJSON } from "../data.js";
 import { t } from "../i18n.js";
 import { baseOption, lineSeries, mountChart } from "../charts.js";
+import { pct } from "../format.js";
 
 export async function renderTarget(root, dict, lang) {
   const data = await loadJSON("panel_target.json");
@@ -12,7 +13,7 @@ export async function renderTarget(root, dict, lang) {
   const inside = Boolean(bm.latest_inside);
   const statusKey = inside ? "panel.target.inside" : "panel.target.outside";
   const statusClass = inside ? "flag-inside" : "flag-outside";
-  const latestText = bm.latest_value === null ? "—" : `${bm.latest_value.toFixed(1)}%`;
+  const latestText = bm.latest_value === null ? "—" : pct(bm.latest_value, lang, 1);
 
   const section = document.createElement("section");
   section.className = "panel";
@@ -55,7 +56,5 @@ export async function renderTarget(root, dict, lang) {
   );
   option.series = [...headlineSeries, ...coreSeries];
 
-  mountChart(section.querySelector("#chart-target"), option, {
-    asOfLabel: t(dict, "tooltip.asOf"),
-  });
+  mountChart(section.querySelector("#chart-target"), option, { dict, lang });
 }
