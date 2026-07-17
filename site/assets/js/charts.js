@@ -111,6 +111,40 @@ export function lineSeries(block, lang, opts = {}) {
   };
 }
 
+// The chart's text alternative. Composed ONLY from published values - series
+// labels, the first and last dates, and each series' latest non-null value.
+// Deliberately no characterisation ("rising", "inverted"): those are derived
+// claims, and CLAUDE.md's never-recompute-in-JS rule governs the accessible
+// readout exactly as it governs the visual one. Otherwise the screen-reader
+// text could contradict the visible page.
+//
+// It also does not restate the readouts (slope, spread, months-in-band) - those
+// are already accessible HTML text, so repeating them here is noise, not access.
+export function chartAria(series, dict, lang) {
+  const withData = series.filter((s) => s.data.length);
+  if (!withData.length) return t(dict, "chart.aria.empty");
+
+  const names = withData.map((s) => s.name).join(", ");
+  let start = withData[0].data[0][0];
+  let end = withData[0].data[withData[0].data.length - 1][0];
+  for (const s of withData) {
+    const first = s.data[0][0];
+    const last = s.data[s.data.length - 1][0];
+    if (first < start) start = first;
+    if (last > end) end = last;
+  }
+
+  const latest = withData
+    .map((s) => {
+      const pt = lastObservedOnOrBefore(s.data, end);
+      return pt ? `${s.name}: ${num(pt[1], lang)}` : null;
+    })
+    .filter(Boolean)
+    .join(", ");
+
+  return t(dict, "chart.aria", { series: names, start, end, latest });
+}
+
 export function mountChart(el, option, { dict, lang } = {}) {
   // Declared outside the `if` because Tasks 3 and 4 also consume it.
   const palette = option.color || PALETTE;
@@ -125,6 +159,9 @@ export function mountChart(el, option, { dict, lang } = {}) {
       ...option.tooltip,
       formatter: asOfTooltipFormatter(series, t(dict, "tooltip.asOf"), lang),
     };
+    el.setAttribute("role", "img");
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("aria-label", chartAria(series, dict, lang));
   }
 
   const chart = echarts.init(el);
