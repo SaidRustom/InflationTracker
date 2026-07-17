@@ -58,11 +58,19 @@ Series IDs belong in **config**, not code. A series can disappear — treat stal
   JSON, because those compare old code's output to new code's output and would attribute our own commits
   to the Bank. See its **§4.1**: re-parsing does *not* cancel a change to the **fetch window**
   (`start_date`, `recent`) — that is closed separately by `_meta.json` per vintage + skip-on-mismatch.
-- `docs/superpowers/specs/2026-07-17-plan-3b-design.md` — approved design for **Plan 3b**: accessibility
-  remediation + `fr-CA` formatting. Key rules: the chart `aria-label` is composed from **published values
-  only** (a derived claim there could contradict the visual readouts); **dates are already correct in both
-  languages** (en-CA and fr-CA both render ISO); ECharts' built-in `aria` is **rejected on measured
-  evidence**; and we claim only the five tested success criteria, never blanket "WCAG 2.1 AA".
+- `docs/superpowers/specs/2026-07-17-plan-3b-design.md` — approved design for **Plan 3b** (**built and
+  merged**): accessibility remediation + `fr-CA` formatting. Key rules: the chart `aria-label` is composed
+  from **published values only** (a derived claim there could contradict the visual readouts); **dates are
+  already correct in both languages** (en-CA and fr-CA both render ISO); ECharts' built-in `aria` is
+  **rejected on measured evidence**; and we claim only the five tested success criteria, never blanket
+  "WCAG 2.1 AA".
+- `docs/superpowers/specs/2026-07-17-plan-3c-design.md` — approved design for **Plan 3c**: the **Data &
+  Methods page** (renders `revisions.json`'s three states + `data_quality.json` + methodology/honesty
+  prose) + a **published bilingual accessibility statement** + the full WCAG audit. Key rules: **separate
+  static HTML pages** with a shared shell kept in sync by a byte-identical **parity test** (no router, no
+  ARIA tabs); the revision block **branches on `status` first**, never on the count (never_checked ≠ "no
+  revisions"); quality status is **never colour alone** (text + symbol); and the statement claims
+  **"self-assessed against WCAG 2.1 AA", never "certified"**.
 - `docs/superpowers/plans/2026-07-14-inflation-tracker-pipeline.md` — Plan 1 of 3 (pipeline). Done.
 - `docs/superpowers/plans/2026-07-15-inflation-tracker-dashboard.md` — Plan 2 of 3 (M3 dashboard). Done.
   Its "Deferred to Plan 3" section is the input to the next plan.
