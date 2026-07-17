@@ -15,8 +15,14 @@ export async function loadDict(lang) {
   return res.json();
 }
 
-export function t(dict, key) {
-  return Object.prototype.hasOwnProperty.call(dict, key) ? dict[key] : key;
+export function t(dict, key, params) {
+  const raw = Object.prototype.hasOwnProperty.call(dict, key) ? dict[key] : key;
+  if (!params) return raw;
+  // Leave an unknown {placeholder} visibly intact rather than blanking it - a
+  // missing value should look wrong, not silently vanish.
+  return raw.replace(/\{(\w+)\}/g, (whole, name) =>
+    Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : whole
+  );
 }
 
 export function applyStaticText(dict) {
